@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Meu Treino">
+<meta name="description" content="App de treino - Carlos Papaleo">
+<link rel="manifest" id="manifest-link">
+<title>Meu Treino</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-card: #1a1a2e;
+    --bg-card-hover: #1f1f35;
+    --bg-input: #16162a;
+    --accent: #00d4aa;
+    --accent-hover: #00f0c0;
+    --accent-dim: rgba(0, 212, 170, 0.1);
+    --accent-glow: rgba(0, 212, 170, 0.3);
+    --text-primary: #e8e8f0;
+    --text-secondary: #8888a0;
+    --text-muted: #555570;
+    --border: #2a2a40;
+    --border-light: #3a3a55;
+    --danger: #ff4466;
+    --warning: #ffaa00;
+    --success: #00d4aa;
+    --purple: #8844ff;
+    --blue: #4488ff;
+    --peito: #ff4466;
+    --biceps: #ff8800;
+    --costas: #4488ff;
+    --triceps: #8844ff;
+    --ombro: #00bbff;
+    --panturrilha: #ffaa00;
+    --perna: #00d4aa;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 48px rgba(0,0,0,0.6);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-xs: 6px;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(0, 212, 170, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(136, 68, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header {
+    text-align: center;
+    padding: 40px 20px 30px;
+  }
+
+  .header-icon {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    border-radius: 24px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 36px;
+    box-shadow: 0 8px 32px rgba(0, 212, 170, 0.3);
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .header h1 {
+    font-size: 28px; font-weight: 800; letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--text-primary), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+
+  .header .subtitle {
+    color: var(--text-secondary); font-size: 14px; font-weight: 400;
+  }
+
+  .info-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px; margin-bottom: 30px;
+  }
+
+  .info-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px; text-align: center;
+    transition: all 0.3s;
+  }
+
+  .info-item:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 212, 170, 0.1);
+  }
+
+  .info-item .label {
+    font-size: 11px; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 6px; font-weight: 600;
+  }
+
+  .info-item .value {
+    font-size: 16px; font-weight: 700; color: var(--text-primary);
+  }
+
+  .last-session {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-card-hover));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px; margin-bottom: 30px;
+    position: relative; overflow: hidden;
+  }
+
+  .last-session::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; width: 4px; height: 100%;
+    background: linear-gradient(180deg, var(--accent), var(--purple));
+  }
+
+  .last-session h3 {
+    font-size: 13px; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--text-muted);
+    margin-bottom: 10px; font-weight: 600;
+  }
+
+  .last-session .session-info { font-size: 20px; font-weight: 700; color: var(--accent); }
+  .last-session .session-date { font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
+
+  .section-title {
+    font-size: 13px; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--text-muted);
+    margin-bottom: 16px; font-weight: 600;
+  }
+
+  .treino-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px; margin-bottom: 30px;
+  }
+
+  .treino-btn {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px 12px; cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center; position: relative; overflow: hidden;
+  }
+
+  .treino-btn::before {
+    content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s;
+  }
+
+  .treino-btn[data-treino="A"]::before { background: linear-gradient(180deg, rgba(255,68,102,0.1), transparent); }
+  .treino-btn[data-treino="B"]::before { background: linear-gradient(180deg, rgba(68,136,255,0.1), transparent); }
+  .treino-btn[data-treino="C"]::before { background: linear-gradient(180deg, rgba(0,187,255,0.1), transparent); }
+  .treino-btn[data-treino="D"]::before { background: linear-gradient(180deg, rgba(0,212,170,0.1), transparent); }
+
+  .treino-btn:hover::before, .treino-btn.active::before { opacity: 1; }
+  .treino-btn:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+  .treino-btn.active { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+  .treino-btn[data-treino="A"].active { border-color: var(--peito); box-shadow: 0 4px 24px rgba(255,68,102,0.2); }
+  .treino-btn[data-treino="B"].active { border-color: var(--costas); box-shadow: 0 4px 24px rgba(68,136,255,0.2); }
+  .treino-btn[data-treino="C"].active { border-color: var(--ombro); box-shadow: 0 4px 24px rgba(0,187,255,0.2); }
+  .treino-btn[data-treino="D"].active { border-color: var(--perna); box-shadow: 0 4px 24px rgba(0,212,170,0.2); }
+
+  .treino-btn .treino-letter { font-size: 28px; font-weight: 900; margin-bottom: 6px; position: relative; z-index: 1; }
+
+  .treino-btn[data-treino="A"] .treino-letter { color: var(--peito); }
+  .treino-btn[data-treino="B"] .treino-letter { color: var(--costas); }
+  .treino-btn[data-treino="C"] .treino-letter { color: var(--ombro); }
+  .treino-btn[data-treino="D"] .treino-letter { color: var(--perna); }
+
+  .treino-btn .treino-muscles { font-size: 11px; color: var(--text-secondary); font-weight: 500; position: relative; z-index: 1; }
+
+  .exercise-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+
+  .exercise-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden; transition: all 0.3s;
+    animation: slideUp 0.4s ease-out both;
+  }
+
+  .exercise-card:nth-child(1) { animation-delay: 0.0s; }
+  .exercise-card:nth-child(2) { animation-delay: 0.05s; }
+  .exercise-card:nth-child(3) { animation-delay: 0.1s; }
+  .exercise-card:nth-child(4) { animation-delay: 0.15s; }
+  .exercise-card:nth-child(5) { animation-delay: 0.2s; }
+  .exercise-card:nth-child(6) { animation-delay: 0.25s; }
+  .exercise-card:nth-child(7) { animation-delay: 0.3s; }
+  .exercise-card:nth-child(8) { animation-delay: 0.35s; }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .exercise-card:hover { border-color: var(--border-light); box-shadow: var(--shadow); }
+
+  .exercise-card.completed {
+    border-color: rgba(0, 212, 170, 0.4);
+    background: linear-gradient(135deg, var(--bg-card), rgba(0, 212, 170, 0.05));
+  }
+
+  .exercise-main { display: flex; align-items: stretch; }
+
+  .exercise-seq {
+    width: 48px; min-height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800;
+    color: var(--text-muted); flex-shrink: 0;
+  }
+
+  .exercise-card.completed .exercise-seq { color: var(--accent); }
+
+  .exercise-content { flex: 1; padding: 18px 16px 18px 0; display: flex; flex-direction: column; gap: 14px; }
+
+  .exercise-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .exercise-info { flex: 1; }
+
+  .exercise-name { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; line-height: 1.3; }
+
+  .exercise-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    background: var(--bg-input); color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+
+  .tag.cat { color: var(--accent); border-color: rgba(0, 212, 170, 0.2); background: rgba(0, 212, 170, 0.08); }
+  .tag-icon { font-size: 10px; }
+
+  .video-thumb {
+    width: 72px; height: 72px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.3s;
+    flex-shrink: 0; position: relative; overflow: hidden;
+    text-decoration: none;
+  }
+
+  .video-thumb:hover {
+    border-color: var(--accent);
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(0, 212, 170, 0.2);
+  }
+
+  .video-thumb .play-icon { font-size: 28px; color: var(--text-muted); transition: color 0.3s; z-index: 1; }
+  .video-thumb:hover .play-icon { color: var(--accent); }
+
+  .video-thumb img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; opacity: 0.4;
+  }
+
+  .sets-container {
+    display: flex; flex-direction: column; gap: 8px;
+    background: rgba(0,0,0,0.2);
+    border-radius: var(--radius-sm);
+    padding: 12px; border: 1px solid var(--border);
+  }
+
+  .sets-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+
+  .sets-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; }
+  .sets-progress { font-size: 11px; color: var(--text-secondary); font-weight: 600; }
+  .sets-progress .done-count { color: var(--accent); font-weight: 800; }
+
+  .set-row { display: flex; align-items: center; gap: 10px; }
+
+  .set-number {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--bg-input); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    color: var(--text-secondary); flex-shrink: 0; transition: all 0.3s;
+  }
+
+  .set-row.completed .set-number { background: var(--accent); border-color: var(--accent); color: #000; }
+
+  .weight-input-group {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg-input); border: 1px solid var(--border);
+    border-radius: var(--radius-xs); padding: 6px 12px;
+    transition: all 0.3s; flex: 1; min-width: 0;
+  }
+
+  .weight-input-group:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1); }
+  .set-row.completed .weight-input-group { border-color: rgba(0, 212, 170, 0.3); background: rgba(0, 212, 170, 0.05); }
+
+  .weight-input-group .input-icon { font-size: 14px; color: var(--text-muted); flex-shrink: 0; }
+
+  .weight-input {
+    background: none; border: none; color: var(--text-primary);
+    font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;
+    width: 100%; min-width: 0; outline: none;
+  }
+
+  .weight-input::placeholder { color: var(--text-muted); font-weight: 400; }
+  .weight-unit { font-size: 12px; color: var(--text-muted); font-weight: 600; flex-shrink: 0; }
+
+  .complete-btn {
+    padding: 7px 14px; border-radius: var(--radius-xs);
+    border: 1px solid var(--border); background: var(--bg-input);
+    color: var(--text-secondary); font-size: 12px; font-weight: 600;
+    font-family: 'Inter', sans-serif; cursor: pointer;
+    transition: all 0.3s; display: flex; align-items: center;
+    gap: 6px; white-space: nowrap; flex-shrink: 0;
+  }
+
+  .complete-btn:hover { background: rgba(0, 212, 170, 0.1); border-color: var(--accent); color: var(--accent); }
+  .complete-btn.done { background: rgba(0, 212, 170, 0.15); border-color: var(--accent); color: var(--accent); }
+
+  .observation {
+    background: linear-gradient(135deg, rgba(255, 170, 0, 0.08), rgba(255, 170, 0, 0.03));
+    border: 1px solid rgba(255, 170, 0, 0.2);
+    border-radius: var(--radius-sm); padding: 16px 20px;
+    margin-bottom: 30px; display: flex; align-items: center;
+    gap: 12px; font-size: 13px; color: var(--warning); font-weight: 500;
+  }
+
+  .observation .obs-icon { font-size: 20px; flex-shrink: 0; }
+
+  .save-section { display: flex; gap: 12px; margin-bottom: 40px; }
+
+  .save-btn {
+    flex: 1; padding: 16px 24px; border: none;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--accent), #00b894);
+    color: #000; font-size: 15px; font-weight: 700;
+    font-family: 'Inter', sans-serif; cursor: pointer;
+    transition: all 0.3s; display: flex;
+    align-items: center; justify-content: center; gap: 8px;
+  }
+
+  .save-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0, 212, 170, 0.3); }
+  .save-btn:active { transform: translateY(0); }
+
+  .reset-btn {
+    padding: 16px 20px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); background: var(--bg-card);
+    color: var(--text-secondary); font-size: 15px; font-weight: 600;
+    font-family: 'Inter', sans-serif; cursor: pointer;
+    transition: all 0.3s; display: flex; align-items: center; gap: 6px;
+  }
+
+  .reset-btn:hover { border-color: var(--danger); color: var(--danger); background: rgba(255, 68, 102, 0.05); }
+
+  .toast {
+    position: fixed; bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--bg-card); border: 1px solid var(--accent);
+    border-radius: var(--radius-sm); padding: 14px 24px;
+    color: var(--accent); font-size: 14px; font-weight: 600;
+    z-index: 2000;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 32px rgba(0, 212, 170, 0.2);
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .history-section { margin-bottom: 40px; }
+
+  .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .history-item {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; flex-wrap: wrap; gap: 8px;
+  }
+
+  .history-item .hi-treino { font-weight: 700; font-size: 14px; }
+  .history-item .hi-date { color: var(--text-secondary); }
+
+  .history-item .hi-badge {
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+  }
+
+  .progress-section { margin-bottom: 20px; }
+
+  .progress-bar-container {
+    background: var(--bg-input); border-radius: 20px;
+    height: 8px; overflow: hidden; border: 1px solid var(--border);
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--purple));
+    border-radius: 20px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .progress-text {
+    display: flex; justify-content: space-between;
+    margin-top: 8px; font-size: 12px;
+    color: var(--text-muted); font-weight: 500;
+  }
+
+  .timer-section {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+    margin-bottom: 20px; display: none;
+    align-items: center; justify-content: space-between;
+  }
+
+  .timer-section.active { display: flex; }
+
+  .timer-display {
+    font-size: 36px; font-weight: 800;
+    font-variant-numeric: tabular-nums; color: var(--accent);
+  }
+
+  .timer-label {
+    font-size: 12px; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 1px;
+    font-weight: 600; margin-bottom: 4px;
+  }
+
+  .timer-buttons { display: flex; gap: 8px; }
+
+  .timer-btn {
+    padding: 10px 20px; border-radius: var(--radius-xs);
+    border: 1px solid var(--border); background: var(--bg-input);
+    color: var(--text-secondary); font-size: 13px; font-weight: 600;
+    font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.3s;
+  }
+
+  .timer-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .timer-btn.start {
+    background: linear-gradient(135deg, var(--accent), #00b894);
+    border-color: transparent; color: #000;
+  }
+
+  .timer-btn.start:hover { box-shadow: 0 4px 16px rgba(0, 212, 170, 0.3); }
+
+  .footer {
+    text-align: center; padding: 30px;
+    color: var(--text-muted); font-size: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .clear-history-btn {
+    padding: 6px 12px; border-radius: var(--radius-xs);
+    border: 1px solid var(--border); background: none;
+    color: var(--text-muted); font-size: 11px; font-weight: 600;
+    font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.3s;
+  }
+
+  .clear-history-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+  .no-history { text-align: center; padding: 30px; color: var(--text-muted); font-size: 13px; }
+
+  .data-actions { display: flex; gap: 8px; margin-bottom: 30px; flex-wrap: wrap; }
+
+  .data-btn {
+    padding: 10px 16px; border-radius: var(--radius-xs);
+    border: 1px solid var(--border); background: var(--bg-card);
+    color: var(--text-secondary); font-size: 12px; font-weight: 600;
+    font-family: 'Inter', sans-serif; cursor: pointer;
+    transition: all 0.3s; display: flex; align-items: center; gap: 6px;
+  }
+
+  .data-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Install Banner */
+  .install-banner {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-card-hover));
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .install-banner.show { display: flex; }
+
+  .install-banner-text { flex: 1; }
+  .install-banner-text h4 { font-size: 14px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .install-banner-text p { font-size: 12px; color: var(--text-secondary); }
+
+  .install-btn {
+    padding: 10px 20px; border: none;
+    border-radius: var(--radius-xs);
+    background: var(--accent); color: #000;
+    font-size: 13px; font-weight: 700;
+    font-family: 'Inter', sans-serif; cursor: pointer;
+    transition: all 0.3s; white-space: nowrap;
+  }
+
+  .install-btn:hover { box-shadow: 0 4px 16px rgba(0, 212, 170, 0.3); transform: translateY(-1px); }
+
+  .install-dismiss {
+    background: none; border: none; color: var(--text-muted);
+    font-size: 18px; cursor: pointer; padding: 4px;
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 12px; }
+    .header h1 { font-size: 22px; }
+    .info-bar { grid-template-columns: repeat(2, 1fr); }
+    .treino-selector { grid-template-columns: repeat(2, 1fr); }
+    .exercise-top { flex-direction: column; }
+    .video-thumb { width: 100%; height: 56px; }
+    .timer-section { flex-direction: column; gap: 16px; text-align: center; }
+    .complete-btn { padding: 7px 10px; font-size: 11px; }
+    .complete-btn .btn-text { display: none; }
+    .install-banner { flex-direction: column; text-align: center; }
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="header-icon">🏋️</div>
+    <h1>Meu Treino</h1>
+    <p class="subtitle">Carlos Alberto Papaleo • MaxHolanda Personal Trainer</p>
+  </div>
+
+  <!-- Install Banner -->
+  <div class="install-banner" id="installBanner">
+    <div class="install-banner-text">
+      <h4>📲 Instalar App</h4>
+      <p>Adicione à tela inicial para acesso rápido</p>
+    </div>
+    <button class="install-btn" id="installBtn" onclick="installApp()">Instalar</button>
+    <button class="install-dismiss" onclick="dismissInstall()">✕</button>
+  </div>
+
+  <div class="info-bar">
+    <div class="info-item"><div class="label">Objetivo</div><div class="value">Emagrecimento</div></div>
+    <div class="info-item"><div class="label">Frequência</div><div class="value">5x/sem</div></div>
+    <div class="info-item"><div class="label">Início</div><div class="value">27/11/2025</div></div>
+    <div class="info-item"><div class="label">Validade</div><div class="value">60 dias</div></div>
+  </div>
+
+  <div class="last-session" id="lastSession">
+    <h3>📌 Última Sessão</h3>
+    <div class="session-info" id="lastSessionInfo">Nenhuma sessão registrada</div>
+    <div class="session-date" id="lastSessionDate"></div>
+  </div>
+
+  <div class="section-title">Escolha o Treino de Hoje</div>
+  <div class="treino-selector">
+    <button class="treino-btn" data-treino="A" onclick="selectTreino('A')"><div class="treino-letter">A</div><div class="treino-muscles">Peito + Bíceps</div></button>
+    <button class="treino-btn" data-treino="B" onclick="selectTreino('B')"><div class="treino-letter">B</div><div class="treino-muscles">Costas + Tríceps</div></button>
+    <button class="treino-btn" data-treino="C" onclick="selectTreino('C')"><div class="treino-letter">C</div><div class="treino-muscles">Ombro + Pant.</div></button>
+    <button class="treino-btn" data-treino="D" onclick="selectTreino('D')"><div class="treino-letter">D</div><div class="treino-muscles">Perna + Pant.</div></button>
+  </div>
+
+  <div class="timer-section" id="timerSection">
+    <div>
+      <div class="timer-label">⏱️ Descanso (30s)</div>
+      <div class="timer-display" id="timerDisplay">00:30</div>
+    </div>
+    <div class="timer-buttons">
+      <button class="timer-btn start" id="timerStartBtn" onclick="startTimer()">Iniciar</button>
+      <button class="timer-btn" onclick="resetTimer()">Reset</button>
+    </div>
+  </div>
+
+  <div class="progress-section" id="progressSection" style="display:none;">
+    <div class="progress-bar-container"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-text"><span id="progressText">0 de 0 séries completas</span><span id="progressPercent">0%</span></div>
+  </div>
+
+  <div id="exerciseList" class="exercise-list"></div>
+
+  <div class="observation" id="observation" style="display:none;">
+    <span class="obs-icon">⚠️</span>
+    <span>AERÓBIO: FAZER 30 MINUTOS PÓS-TREINO</span>
+  </div>
+
+  <div class="save-section" id="saveSection" style="display:none;">
+    <button class="save-btn" onclick="saveSession()">💾 Salvar Sessão</button>
+    <button class="reset-btn" onclick="resetSession()">🔄</button>
+  </div>
+
+  <div class="data-actions">
+    <button class="data-btn" onclick="exportData()">📤 Exportar JSON</button>
+    <button class="data-btn" onclick="document.getElementById('importFile').click()">📥 Importar JSON</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+  </div>
+
+  <div class="history-section">
+    <div class="history-header">
+      <div class="section-title" style="margin-bottom:0;">📋 Histórico de Sessões</div>
+      <button class="clear-history-btn" onclick="clearHistory()">Limpar</button>
+    </div>
+    <div class="history-list" id="historyList"><div class="no-history">Nenhuma sessão salva ainda.</div></div>
+  </div>
+
+  <div class="footer">MaxHolanda Personal Trainer © 2025</div>
+</div>
+
+<div class="toast" id="toast"><span>✅</span><span id="toastText">Salvo!</span></div>
+
+<script>
+// ============================================
+// PWA - Service Worker & Manifest (gerados inline)
+// ============================================
+const MANIFEST = {
+  name: "Meu Treino - Carlos Papaleo",
+  short_name: "Meu Treino",
+  description: "App de acompanhamento de treino",
+  start_url: location.href.split('?')[0],
+  display: "standalone",
+  background_color: "#0a0a0f",
+  theme_color: "#0a0a0f",
+  orientation: "portrait",
+  icons: [
+    {
+      src: "data:image/svg+xml," + encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+          <rect width="512" height="512" rx="96" fill="#0a0a0f"/>
+          <rect x="20" y="20" width="472" height="472" rx="80" fill="url(#g)"/>
+          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00d4aa"/><stop offset="100%" stop-color="#8844ff"/></linearGradient></defs>
+          <text x="256" y="300" text-anchor="middle" font-size="260" font-family="sans-serif">🏋️</text>
+        </svg>
+      `),
+      sizes: "512x512",
+      type: "image/svg+xml",
+      purpose: "any maskable"
+    }
+  ]
+};
+
+// Injeta manifest como blob URL
+const manifestBlob = new Blob([JSON.stringify(MANIFEST)], { type: 'application/json' });
+const manifestUrl = URL.createObjectURL(manifestBlob);
+document.getElementById('manifest-link').href = manifestUrl;
+
+// Service Worker inline via blob
+const SW_CODE = `
+const CACHE_NAME = 'treino-v2';
+const ASSETS = [self.location.href.replace(/sw\\.js.*/, '')];
+
+self.addEventListener('install', e => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(clients.claim());
+});
+
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    fetch(e.request).catch(() => caches.match(e.request))
+  );
+});
+`;
+
+if ('serviceWorker' in navigator) {
+  const swBlob = new Blob([SW_CODE], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl, { scope: '/' }).catch(() => {
+    // Se blob URL não funcionar para SW, tenta sem (PWA pode não funcionar offline, mas install sim)
+    console.log('SW via blob não suportado. Para PWA completo, sirva o arquivo via HTTPS.');
+  });
+}
+
+// Install prompt
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(result => {
+      if (result.outcome === 'accepted') {
+        showToast('📲 App instalado com sucesso!');
+      }
+      deferredPrompt = null;
+      document.getElementById('installBanner').classList.remove('show');
+    });
+  } else {
+    showToast('💡 Abra o menu do navegador → "Adicionar à tela inicial"');
+  }
+}
+
+function dismissInstall() {
+  document.getElementById('installBanner').classList.remove('show');
+}
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').classList.remove('show');
+  showToast('✅ App instalado na tela inicial!');
+});
+
+// ============================================
+// SOM DE SINO (gerado via Web Audio API)
+// ============================================
+let audioCtx = null;
+
+function playBellSound() {
+  try {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    const now = audioCtx.currentTime;
+
+    // Sino 1 - tom principal
+    playTone(audioCtx, 830, now, 0.6, 1.2);
+    // Sino 2 - harmônico agudo
+    playTone(audioCtx, 1245, now + 0.05, 0.3, 0.8);
+    // Sino 3 - harmônico grave
+    playTone(audioCtx, 622, now + 0.02, 0.2, 1.0);
+
+    // Segundo toque (repetição)
+    playTone(audioCtx, 830, now + 0.5, 0.5, 1.0);
+    playTone(audioCtx, 1245, now + 0.55, 0.25, 0.7);
+    playTone(audioCtx, 622, now + 0.52, 0.15, 0.8);
+
+    // Terceiro toque
+    playTone(audioCtx, 988, now + 1.0, 0.6, 1.5);
+    playTone(audioCtx, 1480, now + 1.05, 0.3, 1.0);
+    playTone(audioCtx, 740, now + 1.02, 0.2, 1.2);
+
+  } catch (e) {
+    console.log('Audio não suportado:', e);
+  }
+}
+
+function playTone(ctx, freq, startTime, volume, duration) {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(freq, startTime);
+
+  // Envelope de sino: ataque rápido, decaimento longo
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(volume, startTime + 0.005);
+  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.1);
+}
+
+// Pré-inicializa áudio no primeiro toque do usuário (necessário no mobile)
+document.addEventListener('click', function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Toca silêncio pra desbloquear
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    gain.gain.value = 0;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.01);
+  }
+  document.removeEventListener('click', initAudio);
+}, { once: true });
+
+// ============================================
+// DATA
+// ============================================
+const TREINOS = {
+  A: {
+    nome: "Treino A",
+    descricao: "Peito + Bíceps",
+    exercicios: [
+      { seq: 1, categoria: "PEITO", exercicio: "Crucifixo reto haltere", series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "QSXGl9k0Y9o" },
+      { seq: 2, categoria: "PEITO", exercicio: "Crucifixo inclinado haltere", series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "MwEnOb-PypY" },
+      { seq: 3, categoria: "PEITO", exercicio: "Supino Inclinado (Barra)", series: 4, repeticoes: 12, descanso: '30"', metodo: "Falha concêntrica", videoId: "oZjIQN0YMX0" },
+      { seq: 4, categoria: "PEITO", exercicio: "Supino máquina (vertical)", series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "YIwYL1DjXzo" },
+      { seq: 5, categoria: "BÍCEPS", exercicio: "Rosca direta polia baixa barra reta", series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "_ziU37WD50I" },
+      { seq: 6, categoria: "BÍCEPS", exercicio: "Rosca Scott máquina", series: 4, repeticoes: 12, descanso: '30"', metodo: "Falha concêntrica", videoId: "yIIgcVRkzus" },
+      { seq: 7, categoria: "BÍCEPS", exercicio: "Rosca alternada", series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "ZoUpUPAB0k4" },
+    ]
+  },
+  B: {
+    nome: "Treino B",
+    descricao: "Costas + Tríceps",
+    exercicios: [
+      { seq: 1, categoria: "COSTAS", exercicio: "Remada baixa pegada média supinada", series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "GM2aDUWCcmA" },
+      { seq: 2, categoria: "COSTAS", exercicio: "Puxada Frontal pegada média supinada", series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "s7rIjonbitM" },
+      { seq: 3, categoria: "COSTAS", exercicio: "Remada articulada pegada pronada", series: 4, repeticoes: 12, descanso: '30"', metodo: "Falha concêntrica", videoId: "2GirmeQe_vU" },
+      { seq: 4, categoria: "COSTAS", exercicio: "Remada Unilateral Halteres", series: 4, repeticoes: 12, descanso: '30"', metodo: "Falha concêntrica", videoId: "EUisRaNkCd4" },
+      { seq: 5, categoria: "TRÍCEPS", exercicio: "Tríceps francês com halter unilateral", series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "zPAfW4JyUTI" },
+      { seq: 6, categoria: "TRÍCEPS", exercicio: "Tríceps pulley com corda", series: 4, repeticoes: 12, descanso: '30"', metodo: "Falha concêntrica", videoId: "AIKKKRaBSVI" },
+      { seq: 7, categoria: "TRÍCEPS", exercicio: 'Tríceps pulley barra "W"', series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "L_JCIopVIsc" },
+    ]
+  },
+  C: {
+    nome: "Treino C",
+    descricao: "Ombro + Panturrilha",
+    exercicios: [
+      { seq: 1, categoria: "OMBRO", exercicio: "Desenvolvimento Halteres", series: 4, repeticoes: 12, descanso: '30"', metodo: "Falha concêntrica", videoId: "L-iQfHVeuVg" },
+      { seq: 2, categoria: "OMBRO", exercicio: "Desenvolvimento máquina", series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "cdyTJSiQLUQ" },
+      { seq: 3, categoria: "OMBRO", exercicio: "Remada Alta barra reta", series: 4, repeticoes: 12, descanso: '30"', metodo: "Falha concêntrica", videoId: "AtzPUaAktk8" },
+      { seq: 4, categoria: "OMBRO", exercicio: "Elevação Lateral com Halteres", series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "qDAoUOmdbi4" },
+      { seq: 5, categoria: "OMBRO", exercicio: "Elevação Frontal com Halteres", series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "jhxLYSm_P-k" },
+      { seq: 6, categoria: "OMBRO", exercicio: "Crucifixo inverso máquina neutra", series: 4, repeticoes: 12, descanso: '30"', metodo: "Falha concêntrica", videoId: "mtZOrNqFywg" },
+      { seq: 7, categoria: "PANTURRILHA", exercicio: "Panturrilha unilateral leg 180", series: 4, repeticoes: 25, descanso: '30"', metodo: "Falha concêntrica", videoId: "JzQfdfmczi4" },
+    ]
+  },
+  D: {
+    nome: "Treino D",
+    descricao: "Perna + Panturrilha",
+    exercicios: [
+      { seq: 1, categoria: "PERNA", exercicio: "Leg Press 45°", series: 4, repeticoes: 12, descanso: '30"', metodo: "Falha concêntrica", videoId: "9ruGCg0m9Tw" },
+      { seq: 2, categoria: "PERNA", exercicio: "Legpress 180", series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "qdQ1s6Nj9Ws" },
+      { seq: 3, categoria: "PERNA", exercicio: "Cadeira extensora", series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "vXPyY9kAfEY" },
+      { seq: 4, categoria: "PERNA", exercicio: "Cadeira flexora", series: 4, repeticoes: 12, descanso: '30"', metodo: "Falha concêntrica", videoId: "akMX56zztVc" },
+      { seq: 5, categoria: "PERNA", exercicio: "Cadeira abdutora", series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "df5fcakxBPk" },
+      { seq: 6, categoria: "PERNA", exercicio: "Cadeira adutora", series: 4, repeticoes: 15, descanso: '30"', metodo: "Falha concêntrica", videoId: "qUT8i4MVhv8" },
+      { seq: 7, categoria: "PANTURRILHA", exercicio: "Panturrilha sentada", series: 4, repeticoes: 25, descanso: '30"', metodo: "Falha concêntrica", videoId: "MNZ0K_bu5PU" },
+      { seq: 8, categoria: "PANTURRILHA", exercicio: "Panturrilha no legpress 180", series: 4, repeticoes: 25, descanso: '30"', metodo: "Falha concêntrica", videoId: "nXUIaCdvnxk" },
+    ]
+  }
+};
+
+// ============================================
+// STATE
+// ============================================
+let currentTreino = null;
+let sessionData = {};
+let timerInterval = null;
+let timerSeconds = 30;
+
+function loadAllData() {
+  try {
+    const raw = localStorage.getItem('treino_data');
+    return raw ? JSON.parse(raw) : { weights: {}, history: [], lastSession: null };
+  } catch { return { weights: {}, history: [], lastSession: null }; }
+}
+
+function saveAllData(data) { localStorage.setItem('treino_data', JSON.stringify(data)); }
+
+function getCatColor(cat) {
+  const c = cat.toUpperCase();
+  if (c === 'PEITO') return 'var(--peito)';
+  if (c === 'BÍCEPS') return 'var(--biceps)';
+  if (c === 'COSTAS') return 'var(--costas)';
+  if (c === 'TRÍCEPS') return 'var(--triceps)';
+  if (c === 'OMBRO') return 'var(--ombro)';
+  if (c === 'PANTURRILHA') return 'var(--panturrilha)';
+  if (c === 'PERNA') return 'var(--perna)';
+  return 'var(--accent)';
+}
+
+function init() { updateLastSession(); renderHistory(); }
+
+function updateLastSession() {
+  const data = loadAllData();
+  const el = document.getElementById('lastSessionInfo');
+  const dateEl = document.getElementById('lastSessionDate');
+  if (data.lastSession) {
+    el.textContent = `Treino ${data.lastSession.treino} — ${TREINOS[data.lastSession.treino].descricao}`;
+    dateEl.textContent = `Realizado em ${data.lastSession.date}`;
+  } else {
+    el.textContent = 'Nenhuma sessão registrada';
+    dateEl.textContent = 'Selecione um treino abaixo para começar';
+  }
+}
+
+// ============================================
+// SELECT TREINO
+// ============================================
+function selectTreino(letra) {
+  currentTreino = letra;
+  sessionData = {};
+
+  document.querySelectorAll('.treino-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelector(`.treino-btn[data-treino="${letra}"]`).classList.add('active');
+
+  const data = loadAllData();
+  const treino = TREINOS[letra];
+  const list = document.getElementById('exerciseList');
+  list.innerHTML = '';
+
+  treino.exercicios.forEach((ex) => {
+    const exerciseKey = `${letra}_${ex.seq}`;
+    const sets = [];
+    for (let i = 1; i <= ex.series; i++) {
+      const setKey = `${exerciseKey}_s${i}`;
+      sets.push({ weight: data.weights[setKey] || '', completed: false });
+    }
+    sessionData[exerciseKey] = { sets, exerciseInfo: ex };
+
+    const catColor = getCatColor(ex.categoria);
+
+    let setsHtml = '';
+    for (let i = 0; i < ex.series; i++) {
+      setsHtml += `
+        <div class="set-row" id="set-${exerciseKey}-${i}">
+          <div class="set-number">${i + 1}</div>
+          <div class="weight-input-group">
+            <span class="input-icon">🏋️</span>
+            <input type="number" class="weight-input" id="weight-${exerciseKey}-${i}"
+                   placeholder="Peso" value="${sets[i].weight}" inputmode="decimal" step="0.5"
+                   onchange="updateWeight('${exerciseKey}', ${i}, this.value)"
+                   oninput="updateWeight('${exerciseKey}', ${i}, this.value)">
+            <span class="weight-unit">kg</span>
+          </div>
+          <button class="complete-btn" id="btn-${exerciseKey}-${i}" onclick="toggleSet('${exerciseKey}', ${i})">
+            <span>☐</span><span class="btn-text">Concluir</span>
+          </button>
+        </div>`;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'exercise-card';
+    card.id = `card-${exerciseKey}`;
+    card.innerHTML = `
+      <div class="exercise-main">
+        <div class="exercise-seq">${ex.seq}</div>
+        <div class="exercise-content">
+          <div class="exercise-top">
+            <div class="exercise-info">
+              <div class="exercise-name">${ex.exercicio}</div>
+              <div class="exercise-tags">
+                <span class="tag cat" style="color:${catColor};border-color:${catColor}33;background:${catColor}15;">${ex.categoria}</span>
+                <span class="tag"><span class="tag-icon">🔄</span> ${ex.series}×${ex.repeticoes}</span>
+                <span class="tag"><span class="tag-icon">⏱️</span> ${ex.descanso}</span>
+                <span class="tag"><span class="tag-icon">💪</span> ${ex.metodo}</span>
+              </div>
+            </div>
+            <a class="video-thumb" href="https://www.youtube.com/watch?v=${ex.videoId}" target="_blank" rel="noopener" title="Assistir: ${ex.exercicio}">
+              <img src="https://img.youtube.com/vi/${ex.videoId}/mqdefault.jpg" alt="thumb" loading="lazy">
+              <span class="play-icon">▶</span>
+            </a>
+          </div>
+          <div class="sets-container">
+            <div class="sets-header">
+              <span class="sets-title">Séries</span>
+              <span class="sets-progress"><span class="done-count" id="done-${exerciseKey}">0</span>/${ex.series}</span>
+            </div>
+            ${setsHtml}
+          </div>
+        </div>
+      </div>`;
+    list.appendChild(card);
+  });
+
+  document.getElementById('observation').style.display = 'flex';
+  document.getElementById('saveSection').style.display = 'flex';
+  document.getElementById('progressSection').style.display = 'block';
+  document.getElementById('timerSection').classList.add('active');
+  updateProgress();
+  list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ============================================
+// WEIGHT & SETS
+// ============================================
+function updateWeight(exerciseKey, setIndex, value) {
+  if (sessionData[exerciseKey]?.sets[setIndex]) sessionData[exerciseKey].sets[setIndex].weight = value;
+}
+
+function toggleSet(exerciseKey, setIndex) {
+  const ex = sessionData[exerciseKey];
+  if (!ex) return;
+  const set = ex.sets[setIndex];
+  set.completed = !set.completed;
+
+  const setRow = document.getElementById(`set-${exerciseKey}-${setIndex}`);
+  const btn = document.getElementById(`btn-${exerciseKey}-${setIndex}`);
+
+  if (set.completed) {
+    setRow.classList.add('completed');
+    btn.classList.add('done');
+    btn.innerHTML = '<span>✅</span><span class="btn-text">Feito</span>';
+    const nextSet = ex.sets[setIndex + 1];
+    if (nextSet && !nextSet.weight && set.weight) {
+      nextSet.weight = set.weight;
+      const nextInput = document.getElementById(`weight-${exerciseKey}-${setIndex + 1}`);
+      if (nextInput) nextInput.value = set.weight;
+    }
+    resetTimer();
+    startTimer();
+  } else {
+    setRow.classList.remove('completed');
+    btn.classList.remove('done');
+    btn.innerHTML = '<span>☐</span><span class="btn-text">Concluir</span>';
+  }
+
+  const doneCount = ex.sets.filter(s => s.completed).length;
+  document.getElementById(`done-${exerciseKey}`).textContent = doneCount;
+  const card = document.getElementById(`card-${exerciseKey}`);
+  card.classList.toggle('completed', doneCount === ex.sets.length);
+  updateProgress();
+}
+
+function updateProgress() {
+  let total = 0, done = 0;
+  Object.values(sessionData).forEach(ex => { total += ex.sets.length; done += ex.sets.filter(s => s.completed).length; });
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${done} de ${total} séries completas`;
+  document.getElementById('progressPercent').textContent = pct + '%';
+}
+
+// ============================================
+// TIMER (com som de sino)
+// ============================================
+function startTimer() {
+  if (timerInterval) return;
+  const btn = document.getElementById('timerStartBtn');
+  btn.textContent = 'Pausar';
+  btn.onclick = pauseTimer;
+
+  timerInterval = setInterval(() => {
+    timerSeconds--;
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerSeconds = 0;
+      btn.textContent = 'Iniciar';
+      btn.onclick = startTimer;
+
+      // 🔔 TOCA O SINO
+      playBellSound();
+
+      if ('vibrate' in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
+      showToast('🔔 Descanso acabou! Bora próxima série!');
+
+      setTimeout(() => { if (!timerInterval) { timerSeconds = 30; updateTimerDisplay(); } }, 3000);
+    }
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function pauseTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  const btn = document.getElementById('timerStartBtn');
+  btn.textContent = 'Continuar';
+  btn.onclick = startTimer;
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerSeconds = 30;
+  updateTimerDisplay();
+  const btn = document.getElementById('timerStartBtn');
+  btn.textContent = 'Iniciar';
+  btn.onclick = startTimer;
+}
+
+function updateTimerDisplay() {
+  const min = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+  const sec = (timerSeconds % 60).toString().padStart(2, '0');
+  document.getElementById('timerDisplay').textContent = `${min}:${sec}`;
+  document.getElementById('timerDisplay').style.color = (timerSeconds <= 5 && timerSeconds > 0) ? 'var(--danger)' : 'var(--accent)';
+}
+
+// ============================================
+// SAVE / RESET / HISTORY
+// ============================================
+function saveSession() {
+  if (!currentTreino) return;
+  const data = loadAllData();
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+  Object.entries(sessionData).forEach(([ek, ex]) => {
+    ex.sets.forEach((set, idx) => { if (set.weight) data.weights[`${ek}_s${idx + 1}`] = set.weight; });
+  });
+
+  let totalSets = 0, doneSets = 0;
+  Object.values(sessionData).forEach(ex => { totalSets += ex.sets.length; doneSets += ex.sets.filter(s => s.completed).length; });
+
+  data.history.unshift({ treino: currentTreino, date: dateStr, completed: doneSets, total: totalSets });
+  if (data.history.length > 50) data.history = data.history.slice(0, 50);
+  data.lastSession = { treino: currentTreino, date: dateStr };
+
+  saveAllData(data);
+  updateLastSession();
+  renderHistory();
+  showToast('💾 Sessão salva com sucesso!');
+}
+
+function resetSession() {
+  if (!currentTreino || !confirm('Resetar todas as séries?')) return;
+  Object.entries(sessionData).forEach(([ek, ex]) => {
+    ex.sets.forEach((set, idx) => {
+      set.completed = false;
+      const row = document.getElementById(`set-${ek}-${idx}`);
+      const btn = document.getElementById(`btn-${ek}-${idx}`);
+      if (row) row.classList.remove('completed');
+      if (btn) { btn.classList.remove('done'); btn.innerHTML = '<span>☐</span><span class="btn-text">Concluir</span>'; }
+    });
+    document.getElementById(`done-${ek}`).textContent = '0';
+    document.getElementById(`card-${ek}`)?.classList.remove('completed');
+  });
+  updateProgress();
+  showToast('🔄 Sessão resetada!');
+}
+
+function renderHistory() {
+  const data = loadAllData();
+  const list = document.getElementById('historyList');
+  if (!data.history?.length) { list.innerHTML = '<div class="no-history">Nenhuma sessão salva ainda.</div>'; return; }
+  list.innerHTML = data.history.slice(0, 15).map(item => {
+    const color = { A: 'var(--peito)', B: 'var(--costas)', C: 'var(--ombro)', D: 'var(--perna)' }[item.treino] || 'var(--accent)';
+    const pct = Math.round((item.completed / item.total) * 100);
+    return `<div class="history-item">
+      <span class="hi-treino" style="color:${color}">Treino ${item.treino}</span>
+      <span class="hi-date">${item.date}</span>
+      <span class="hi-badge" style="background:${color}22;color:${color};border:1px solid ${color}33;">${item.completed}/${item.total} (${pct}%)</span>
+    </div>`;
+  }).join('');
+}
+
+function clearHistory() {
+  if (!confirm('Limpar todo o histórico?')) return;
+  const data = loadAllData();
+  data.history = []; data.lastSession = null;
+  saveAllData(data); updateLastSession(); renderHistory();
+  showToast('🗑️ Histórico limpo!');
+}
+
+// ============================================
+// EXPORT / IMPORT
+// ============================================
+function exportData() {
+  const data = loadAllData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `treino_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('📤 Dados exportados!');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      saveAllData(JSON.parse(e.target.result));
+      updateLastSession(); renderHistory();
+      if (currentTreino) selectTreino(currentTreino);
+      showToast('📥 Dados importados!');
+    } catch { showToast('❌ Erro ao importar!'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ============================================
+// TOAST
+// ============================================
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastText').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+init();
+</script>
+
+</body>
+</html>
