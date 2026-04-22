@@ -734,7 +734,7 @@ const firebaseConfig = {
   projectId: "meutreino-1d5cb",
   storageBucket: "meutreino-1d5cb.firebasestorage.app",
   messagingSenderId: "1007147029813",
-  appId: "1:1007147029813:web:dde4b528c9c2ff9353287c"
+  appId: "1:1007147029813:web:dde4b528c9c2ff9353287c"            "COLE_AQUI"    // Ex: "1:123456789:web:abc..."
 };
 
 // ── Inicializa Firebase ──
@@ -1053,6 +1053,82 @@ let sessionData = {};
 let timerInterval = null;
 let timerSeconds = 30;
 
+// ============================================
+// SESSÃO EM ANDAMENTO (auto-save / auto-restore)
+// ============================================
+
+// Salva o estado atual da sessão no localStorage
+function saveActiveSession() {
+  if (!currentTreino) return;
+  const snapshot = {};
+  Object.entries(sessionData).forEach(([key, ex]) => {
+    snapshot[key] = ex.sets.map(s => ({ weight: s.weight, completed: s.completed }));
+  });
+  try {
+    localStorage.setItem('treino_session_active', JSON.stringify({
+      treino: currentTreino,
+      sets: snapshot,
+      savedAt: Date.now()
+    }));
+  } catch(e) {}
+}
+
+// Lê a sessão salva, se existir e for recente (menos de 12h)
+function loadActiveSession() {
+  try {
+    const raw = localStorage.getItem('treino_session_active');
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    const dozeHoras = 12 * 60 * 60 * 1000;
+    if (Date.now() - s.savedAt > dozeHoras) {
+      localStorage.removeItem('treino_session_active');
+      return null;
+    }
+    return s;
+  } catch(e) { return null; }
+}
+
+// Restaura visualmente o estado salvo após renderizar o treino
+function restoreActiveSession(saved) {
+  if (!saved || saved.treino !== currentTreino) return;
+  Object.entries(saved.sets).forEach(([exerciseKey, sets]) => {
+    if (!sessionData[exerciseKey]) return;
+    sets.forEach((savedSet, i) => {
+      const ex = sessionData[exerciseKey];
+      if (!ex.sets[i]) return;
+
+      // Restaura peso
+      if (savedSet.weight) {
+        ex.sets[i].weight = savedSet.weight;
+        const input = document.getElementById(`weight-${exerciseKey}-${i}`);
+        if (input) input.value = savedSet.weight;
+      }
+
+      // Restaura série concluída
+      if (savedSet.completed) {
+        ex.sets[i].completed = true;
+        const setRow = document.getElementById(`set-${exerciseKey}-${i}`);
+        const btn    = document.getElementById(`btn-${exerciseKey}-${i}`);
+        if (setRow) setRow.classList.add('completed');
+        if (btn) { btn.classList.add('done'); btn.innerHTML = '<span>✅</span><span class="btn-text">Feito</span>'; }
+      }
+    });
+
+    // Atualiza contador de séries feitas no card
+    const doneCount = sessionData[exerciseKey].sets.filter(s => s.completed).length;
+    const doneEl = document.getElementById(`done-${exerciseKey}`);
+    if (doneEl) doneEl.textContent = doneCount;
+    const card = document.getElementById(`card-${exerciseKey}`);
+    if (card) card.classList.toggle('completed', doneCount === sessionData[exerciseKey].sets.length);
+  });
+  updateProgress();
+}
+
+// Apaga a sessão ativa (chamado ao salvar ou resetar)
+function clearActiveSession() {
+  try { localStorage.removeItem('treino_session_active'); } catch(e) {}
+}
+
 function getCatColor(cat) {
   const c = cat.toUpperCase();
   if (c === 'PEITO')       return 'var(--peito)';
@@ -1065,7 +1141,16 @@ function getCatColor(cat) {
   return 'var(--accent)';
 }
 
-function init() { updateLastSession(); renderHistory(); }
+function init() {
+  updateLastSession();
+  renderHistory();
+
+  // Se havia uma sessão em andamento, retoma automaticamente
+  const saved = loadActiveSession();
+  if (saved && TREINOS[saved.treino]) {
+    selectTreino(saved.treino, saved);
+  }
+}
 
 function updateLastSession() {
   const data = loadAllData();
@@ -1083,7 +1168,7 @@ function updateLastSession() {
 // ============================================
 // SELECT TREINO
 // ============================================
-function selectTreino(letra) {
+function selectTreino(letra, savedSession) {
   currentTreino = letra;
   sessionData = {};
 
@@ -1163,15 +1248,26 @@ function selectTreino(letra) {
   document.getElementById('saveSection').style.display = 'flex';
   document.getElementById('progressSection').style.display = 'block';
   document.getElementById('timerSection').classList.add('active');
+
+  // Restaura sessão salva (se veio do auto-restore) ou salva nova sessão iniciada
+  if (savedSession) {
+    restoreActiveSession(savedSession);
+  } else {
+    saveActiveSession();
+    list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   updateProgress();
-  list.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ============================================
 // WEIGHT & SETS
 // ============================================
 function updateWeight(exerciseKey, setIndex, value) {
-  if (sessionData[exerciseKey]?.sets[setIndex]) sessionData[exerciseKey].sets[setIndex].weight = value;
+  if (sessionData[exerciseKey]?.sets[setIndex]) {
+    sessionData[exerciseKey].sets[setIndex].weight = value;
+    saveActiveSession();
+  }
 }
 
 function toggleSet(exerciseKey, setIndex) {
@@ -1206,6 +1302,7 @@ function toggleSet(exerciseKey, setIndex) {
   const card = document.getElementById(`card-${exerciseKey}`);
   card.classList.toggle('completed', doneCount === ex.sets.length);
   updateProgress();
+  saveActiveSession();
 }
 
 function updateProgress() {
@@ -1289,6 +1386,7 @@ function saveSession() {
   data.lastSession = { treino: currentTreino, date: dateStr };
 
   saveAllData(data);
+  clearActiveSession();
   updateLastSession();
   renderHistory();
   showToast(currentUser ? '💾 Sessão salva na nuvem! ☁' : '💾 Sessão salva localmente!');
@@ -1308,6 +1406,7 @@ function resetSession() {
     document.getElementById(`card-${ek}`)?.classList.remove('completed');
   });
   updateProgress();
+  clearActiveSession();
   showToast('🔄 Sessão resetada!');
 }
 
