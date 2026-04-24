@@ -633,15 +633,13 @@
   </div>
 
   <!-- ── Auth Bar ── -->
-  <div class="auth-bar">
-    <div class="auth-status">
-      <div class="auth-dot" id="authDot"></div>
-      <span id="authStatusText">Carregando...</span>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;padding:6px 10px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xs);">
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);min-width:0;overflow:hidden;">
+      <div id="authDot" style="width:7px;height:7px;border-radius:50%;background:var(--text-muted);flex-shrink:0;"></div>
+      <span id="authStatusText" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Carregando...</span>
+      <span id="syncIndicator" style="font-size:11px;color:var(--text-muted);white-space:nowrap;"></span>
     </div>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <span class="sync-indicator" id="syncIndicator"></span>
-      <button class="auth-btn login" id="authBtn" onclick="handleAuth()">Entrar com Google</button>
-    </div>
+    <button id="authBtn" onclick="handleAuth()" style="flex-shrink:0;padding:4px 10px;border-radius:var(--radius-xs);border:1px solid var(--accent);background:rgba(0,212,170,0.08);color:var(--accent);font-size:11px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap;">Entrar com Google</button>
   </div>
 
   <!-- Install Banner -->
@@ -827,19 +825,24 @@ auth.onAuthStateChanged(async (user) => {
   const btn  = document.getElementById('authBtn');
 
   if (user) {
-    dot.classList.add('online');
-    txt.innerHTML = `Olá, <span class="auth-name">${user.displayName || user.email}</span>`;
+    dot.style.background = 'var(--accent)';
+    dot.style.boxShadow  = '0 0 6px var(--accent)';
+    txt.textContent = user.displayName || user.email;
     btn.textContent = 'Sair';
-    btn.className = 'auth-btn logout';
-    setSyncIndicator('syncing', '⟳ Carregando...');
+    btn.style.borderColor = 'var(--border)';
+    btn.style.color = 'var(--text-muted)';
+    btn.style.background = 'none';
+    setSyncIndicator('syncing', '⟳');
     await loadFromFirestore();
   } else {
-    dot.classList.remove('online');
-    txt.textContent = 'Não conectado — dados salvos só neste navegador';
+    dot.style.background = 'var(--text-muted)';
+    dot.style.boxShadow  = 'none';
+    txt.textContent = 'Não conectado';
     btn.textContent = 'Entrar com Google';
-    btn.className = 'auth-btn login';
+    btn.style.borderColor = 'var(--accent)';
+    btn.style.color = 'var(--accent)';
+    btn.style.background = 'rgba(0,212,170,0.08)';
     setSyncIndicator('', '');
-    // Carrega do localStorage normalmente
     updateLastSession();
     renderHistory();
   }
