@@ -729,12 +729,12 @@
 // Console → Configurações do projeto → Seus apps → SDK
 // ============================================
 const firebaseConfig = {
-  apiKey: "AIzaSyAc8m4C9B8hUF-spwS6zlMxjGxZ_FMIUzQ",
-  authDomain: "meutreino-1d5cb.firebaseapp.com",
-  projectId: "meutreino-1d5cb",
-  storageBucket: "meutreino-1d5cb.firebasestorage.app",
-  messagingSenderId: "1007147029813",
-  appId: "1:1007147029813:web:dde4b528c9c2ff9353287c"
+  apiKey:            "COLE_AQUI",   // Ex: "AIzaSyB..."
+  authDomain:        "COLE_AQUI",   // Ex: "meutreino-abc12.firebaseapp.com"
+  projectId:         "COLE_AQUI",   // Ex: "meutreino-abc12"
+  storageBucket:     "COLE_AQUI",   // Ex: "meutreino-abc12.appspot.com"
+  messagingSenderId: "COLE_AQUI",   // Ex: "123456789"
+  appId:             "COLE_AQUI"    // Ex: "1:123456789:web:abc..."
 };
 
 // ── Inicializa Firebase ──
@@ -771,7 +771,10 @@ async function loadFromFirestore() {
   }
   updateLastSession();
   renderHistory();
-  if (currentTreino) selectTreino(currentTreino);
+  if (currentTreino) {
+    const activeSaved = loadActiveSession();
+    selectTreino(currentTreino, activeSaved || undefined);
+  }
 }
 
 // ── Salva cache no Firestore (em background, sem travar a UI) ──
