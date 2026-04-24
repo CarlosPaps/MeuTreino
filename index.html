@@ -654,70 +654,92 @@
     <button class="install-dismiss" onclick="dismissInstall()">✕</button>
   </div>
 
-  <div class="info-bar">
-    <div class="info-item"><div class="label">Objetivo</div><div class="value">Emagrecimento</div></div>
-    <div class="info-item"><div class="label">Frequência</div><div class="value">5x/sem</div></div>
-    <div class="info-item"><div class="label">Início</div><div class="value">27/11/2025</div></div>
-    <div class="info-item"><div class="label">Validade</div><div class="value">60 dias</div></div>
-  </div>
-
-  <div class="last-session" id="lastSession">
-    <h3>📌 Última Sessão</h3>
-    <div class="session-info" id="lastSessionInfo">Nenhuma sessão registrada</div>
-    <div class="session-date" id="lastSessionDate"></div>
-  </div>
-
-  <div class="section-title">Escolha o Treino de Hoje</div>
-  <div class="treino-selector">
-    <button class="treino-btn" data-treino="A" onclick="selectTreino('A')"><div class="treino-letter">A</div><div class="treino-muscles">Peito + Bíceps</div></button>
-    <button class="treino-btn" data-treino="B" onclick="selectTreino('B')"><div class="treino-letter">B</div><div class="treino-muscles">Costas + Tríceps</div></button>
-    <button class="treino-btn" data-treino="C" onclick="selectTreino('C')"><div class="treino-letter">C</div><div class="treino-muscles">Ombro + Pant.</div></button>
-    <button class="treino-btn" data-treino="D" onclick="selectTreino('D')"><div class="treino-letter">D</div><div class="treino-muscles">Perna + Pant.</div></button>
-  </div>
-
-  <div class="timer-section" id="timerSection">
-    <div>
-      <div class="timer-label">⏱️ Descanso (30s)</div>
-      <div class="timer-display" id="timerDisplay">00:30</div>
+  <!-- TELA INICIAL -->
+  <div id="homeScreen">
+    <div class="info-bar">
+      <div class="info-item"><div class="label">Objetivo</div><div class="value">Emagrecimento</div></div>
+      <div class="info-item"><div class="label">Frequência</div><div class="value">5x/sem</div></div>
+      <div class="info-item"><div class="label">Início</div><div class="value">27/11/2025</div></div>
+      <div class="info-item"><div class="label">Validade</div><div class="value">60 dias</div></div>
     </div>
-    <div class="timer-buttons">
-      <button class="timer-btn start" id="timerStartBtn" onclick="startTimer()">Iniciar</button>
-      <button class="timer-btn" onclick="resetTimer()">Reset</button>
+
+    <div class="last-session" id="lastSession">
+      <h3>📌 Última Sessão</h3>
+      <div class="session-info" id="lastSessionInfo">Nenhuma sessão registrada</div>
+      <div class="session-date" id="lastSessionDate"></div>
     </div>
-  </div>
 
-  <div class="progress-section" id="progressSection" style="display:none;">
-    <div class="progress-bar-container"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
-    <div class="progress-text"><span id="progressText">0 de 0 séries completas</span><span id="progressPercent">0%</span></div>
-  </div>
-
-  <div id="exerciseList" class="exercise-list"></div>
-
-  <div class="observation" id="observation" style="display:none;">
-    <span class="obs-icon">⚠️</span>
-    <span>AERÓBIO: FAZER 30 MINUTOS PÓS-TREINO</span>
-  </div>
-
-  <div class="save-section" id="saveSection" style="display:none;">
-    <button class="save-btn" onclick="saveSession()">💾 Salvar Sessão</button>
-    <button class="reset-btn" onclick="resetSession()">🔄</button>
-  </div>
-
-  <div class="data-actions">
-    <button class="data-btn" onclick="exportData()">📤 Exportar JSON</button>
-    <button class="data-btn" onclick="document.getElementById('importFile').click()">📥 Importar JSON</button>
-    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
-  </div>
-
-  <div class="history-section">
-    <div class="history-header">
-      <div class="section-title" style="margin-bottom:0;">📋 Histórico de Sessões</div>
-      <button class="clear-history-btn" onclick="clearHistory()">Limpar</button>
+    <div class="section-title">Escolha o Treino de Hoje</div>
+    <div class="treino-selector">
+      <button class="treino-btn" data-treino="A" onclick="selectTreino('A')"><div class="treino-letter">A</div><div class="treino-muscles">Peito + Bíceps</div></button>
+      <button class="treino-btn" data-treino="B" onclick="selectTreino('B')"><div class="treino-letter">B</div><div class="treino-muscles">Costas + Tríceps</div></button>
+      <button class="treino-btn" data-treino="C" onclick="selectTreino('C')"><div class="treino-letter">C</div><div class="treino-muscles">Ombro + Pant.</div></button>
+      <button class="treino-btn" data-treino="D" onclick="selectTreino('D')"><div class="treino-letter">D</div><div class="treino-muscles">Perna + Pant.</div></button>
     </div>
-    <div class="history-list" id="historyList"><div class="no-history">Nenhuma sessão salva ainda.</div></div>
+
+    <div class="data-actions">
+      <button class="data-btn" onclick="exportData()">📤 Exportar JSON</button>
+      <button class="data-btn" onclick="document.getElementById('importFile').click()">📥 Importar JSON</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+
+    <div class="history-section">
+      <div class="history-header">
+        <div class="section-title" style="margin-bottom:0;">📋 Histórico de Sessões</div>
+        <button class="clear-history-btn" onclick="clearHistory()">Limpar</button>
+      </div>
+      <div class="history-list" id="historyList"><div class="no-history">Nenhuma sessão salva ainda.</div></div>
+    </div>
+
+    <div class="footer">MaxHolanda Personal Trainer © 2025</div>
   </div>
 
-  <div class="footer">MaxHolanda Personal Trainer © 2025</div>
+  <!-- TELA DE TREINO -->
+  <div id="workoutScreen" style="display:none;">
+
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+      <button onclick="voltarInicio()" id="backBtn" style="
+        display:flex;align-items:center;gap:6px;flex-shrink:0;
+        background:none;border:1px solid var(--border);
+        color:var(--text-secondary);font-family:'Inter',sans-serif;
+        font-size:13px;font-weight:600;padding:9px 14px;
+        border-radius:var(--radius-xs);cursor:pointer;transition:all 0.2s;
+      ">← Voltar</button>
+      <div>
+        <div id="workoutTitle" style="font-size:17px;font-weight:800;color:var(--text-primary);"></div>
+        <div id="workoutSubtitle" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></div>
+      </div>
+    </div>
+
+    <div class="timer-section active" id="timerSection">
+      <div>
+        <div class="timer-label">⏱️ Descanso (30s)</div>
+        <div class="timer-display" id="timerDisplay">00:30</div>
+      </div>
+      <div class="timer-buttons">
+        <button class="timer-btn start" id="timerStartBtn" onclick="startTimer()">Iniciar</button>
+        <button class="timer-btn" onclick="resetTimer()">Reset</button>
+      </div>
+    </div>
+
+    <div class="progress-section" id="progressSection">
+      <div class="progress-bar-container"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-text"><span id="progressText">0 de 0 séries completas</span><span id="progressPercent">0%</span></div>
+    </div>
+
+    <div id="exerciseList" class="exercise-list"></div>
+
+    <div class="observation" id="observation">
+      <span class="obs-icon">⚠️</span>
+      <span>AERÓBIO: FAZER 30 MINUTOS PÓS-TREINO</span>
+    </div>
+
+    <div class="save-section" id="saveSection">
+      <button class="save-btn" onclick="saveSession()">💾 Salvar Sessão</button>
+      <button class="reset-btn" onclick="resetSession()">🔄</button>
+    </div>
+
+  </div>
 </div>
 
 <div class="toast" id="toast"><span>✅</span><span id="toastText">Salvo!</span></div>
@@ -729,12 +751,12 @@
 // Console → Configurações do projeto → Seus apps → SDK
 // ============================================
 const firebaseConfig = {
-  apiKey: "AIzaSyAc8m4C9B8hUF-spwS6zlMxjGxZ_FMIUzQ",
-  authDomain: "meutreino-1d5cb.firebaseapp.com",
-  projectId: "meutreino-1d5cb",
-  storageBucket: "meutreino-1d5cb.firebasestorage.app",
-  messagingSenderId: "1007147029813",
-  appId: "1:1007147029813:web:dde4b528c9c2ff9353287c"
+  apiKey:            "COLE_AQUI",   // Ex: "AIzaSyB..."
+  authDomain:        "COLE_AQUI",   // Ex: "meutreino-abc12.firebaseapp.com"
+  projectId:         "COLE_AQUI",   // Ex: "meutreino-abc12"
+  storageBucket:     "COLE_AQUI",   // Ex: "meutreino-abc12.appspot.com"
+  messagingSenderId: "COLE_AQUI",   // Ex: "123456789"
+  appId:             "COLE_AQUI"    // Ex: "1:123456789:web:abc..."
 };
 
 // ── Inicializa Firebase ──
@@ -1247,20 +1269,35 @@ function selectTreino(letra, savedSession) {
     list.appendChild(card);
   });
 
-  document.getElementById('observation').style.display = 'flex';
-  document.getElementById('saveSection').style.display = 'flex';
-  document.getElementById('progressSection').style.display = 'block';
-  document.getElementById('timerSection').classList.add('active');
+  // Troca de tela: esconde home, mostra treino
+  document.getElementById('homeScreen').style.display = 'none';
+  document.getElementById('workoutScreen').style.display = 'block';
+  document.getElementById('workoutTitle').textContent = `Treino ${letra} — ${treino.descricao}`;
+  document.getElementById('workoutSubtitle').textContent = `${treino.exercicios.length} exercícios · ${treino.exercicios[0].series} séries cada`;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 
   // Restaura sessão salva (se veio do auto-restore) ou salva nova sessão iniciada
   if (savedSession) {
     restoreActiveSession(savedSession);
   } else {
     saveActiveSession();
-    list.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   updateProgress();
+}
+
+// Volta para a tela inicial descartando a sessão
+function voltarInicio() {
+  if (Object.values(sessionData).some(ex => ex.sets.some(s => s.completed))) {
+    if (!confirm('Descartar o progresso atual e voltar ao início?')) return;
+  }
+  clearActiveSession();
+  resetTimer();
+  currentTreino = null;
+  sessionData = {};
+  document.getElementById('workoutScreen').style.display = 'none';
+  document.getElementById('homeScreen').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ============================================
@@ -1393,6 +1430,13 @@ function saveSession() {
   updateLastSession();
   renderHistory();
   showToast(currentUser ? '💾 Sessão salva na nuvem! ☁' : '💾 Sessão salva localmente!');
+  setTimeout(() => {
+    currentTreino = null;
+    sessionData = {};
+    document.getElementById('workoutScreen').style.display = 'none';
+    document.getElementById('homeScreen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 1500);
 }
 
 function resetSession() {
@@ -1411,6 +1455,13 @@ function resetSession() {
   updateProgress();
   clearActiveSession();
   showToast('🔄 Sessão resetada!');
+  setTimeout(() => {
+    currentTreino = null;
+    sessionData = {};
+    document.getElementById('workoutScreen').style.display = 'none';
+    document.getElementById('homeScreen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 1000);
 }
 
 function renderHistory() {
