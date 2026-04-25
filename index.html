@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.googleapis.com https://*.gstatic.com https://*.firebaseio.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://img.youtube.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com;">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0a0a0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,9 +15,9 @@
 <!-- ========================================================= -->
 <!-- FIREBASE SDKs                                             -->
 <!-- ========================================================= -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -1482,6 +1483,12 @@ function resetSession() {
   }, 1000);
 }
 
+function sanitize(str) {
+  const d = document.createElement('div');
+  d.textContent = String(str);
+  return d.innerHTML;
+}
+
 function renderHistory() {
   const data = loadAllData();
   const list = document.getElementById('historyList');
@@ -1489,10 +1496,14 @@ function renderHistory() {
   list.innerHTML = data.history.slice(0, 15).map(item => {
     const color = { A: 'var(--peito)', B: 'var(--costas)', C: 'var(--ombro)', D: 'var(--perna)' }[item.treino] || 'var(--accent)';
     const pct   = Math.round((item.completed / item.total) * 100);
+    const sTreino = sanitize(item.treino);
+    const sDate   = sanitize(item.date);
+    const sComp   = sanitize(item.completed);
+    const sTotal  = sanitize(item.total);
     return `<div class="history-item">
-      <span class="hi-treino" style="color:${color}">Treino ${item.treino}</span>
-      <span class="hi-date">${item.date}</span>
-      <span class="hi-badge" style="background:${color}22;color:${color};border:1px solid ${color}33;">${item.completed}/${item.total} (${pct}%)</span>
+      <span class="hi-treino" style="color:${color}">Treino ${sTreino}</span>
+      <span class="hi-date">${sDate}</span>
+      <span class="hi-badge" style="background:${color}22;color:${color};border:1px solid ${color}33;">${sComp}/${sTotal} (${pct}%)</span>
     </div>`;
   }).join('');
 }
@@ -1525,7 +1536,21 @@ function importData(event) {
   reader.onload = function(e) {
     try {
       const parsed = JSON.parse(e.target.result);
-      saveAllData(parsed);
+      // Validação de schema: garante que o JSON tem a estrutura esperada
+      if (typeof parsed !== 'object' || parsed === null ||
+          (parsed.weights !== undefined && typeof parsed.weights !== 'object') ||
+          (parsed.history !== undefined && !Array.isArray(parsed.history)) ||
+          (parsed.lastSession !== undefined && parsed.lastSession !== null && typeof parsed.lastSession !== 'object')) {
+        showToast('❌ Arquivo inválido ou corrompido!');
+        return;
+      }
+      // Limita tamanho do histórico importado para evitar abuso
+      const safe = {
+        weights:     (typeof parsed.weights === 'object' && parsed.weights !== null) ? parsed.weights : {},
+        history:     Array.isArray(parsed.history) ? parsed.history.slice(0, 200) : [],
+        lastSession: (parsed.lastSession && typeof parsed.lastSession === 'object') ? parsed.lastSession : null
+      };
+      saveAllData(safe);
       updateLastSession(); renderHistory();
       if (currentTreino) selectTreino(currentTreino);
       showToast(currentUser ? '📥 Dados importados e sincronizados! ☁' : '📥 Dados importados!');
