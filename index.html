@@ -2,14 +2,14 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.googleapis.com https://*.gstatic.com https://*.firebaseio.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://img.youtube.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.googleapis.com https://*.gstatic.com https://*.firebaseio.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://accounts.google.com; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://img.youtube.com https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://accounts.google.com;">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0a0a0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Meu Treino">
 <meta name="description" content="App de treino - Carlos Papaleo">
-<link rel="manifest" id="manifest-link">
+<link rel="manifest" href="manifest.webmanifest">
 <title>Meu Treino</title>
 
 <!-- ========================================================= -->
@@ -856,12 +856,45 @@ async function handleAuth() {
     showToast('👋 Saiu da conta');
   } else {
     const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     try {
       await auth.signInWithPopup(provider);
     } catch (e) {
-      showToast('❌ Erro ao entrar: ' + e.message);
+      console.error('Erro ao entrar:', e);
+      const useRedirect = [
+        'auth/popup-blocked',
+        'auth/cancelled-popup-request',
+        'auth/operation-not-supported-in-this-environment'
+      ].includes(e.code);
+
+      if (useRedirect) {
+        try {
+          showToast('↗ Abrindo login do Google...');
+          await auth.signInWithRedirect(provider);
+        } catch (redirectError) {
+          console.error('Erro no redirect de login:', redirectError);
+          showToast('❌ ' + getAuthErrorMessage(redirectError));
+        }
+        return;
+      }
+
+      showToast('❌ ' + getAuthErrorMessage(e));
     }
   }
+}
+
+auth.getRedirectResult().catch((e) => {
+  console.error('Erro ao concluir login:', e);
+  showToast('❌ ' + getAuthErrorMessage(e));
+});
+
+function getAuthErrorMessage(error) {
+  const code = error && error.code;
+  if (code === 'auth/popup-closed-by-user') return 'Login cancelado antes de concluir.';
+  if (code === 'auth/unauthorized-domain') return 'Domínio não autorizado no Firebase Auth.';
+  if (code === 'auth/network-request-failed') return 'Falha de rede ao conectar ao Firebase.';
+  if (code === 'auth/web-storage-unsupported') return 'O navegador bloqueou armazenamento necessário para login.';
+  return (error && error.message) || 'Não foi possível entrar.';
 }
 
 // ============================================
@@ -888,83 +921,102 @@ function saveAllData(data) {
 }
 
 // ============================================
-// PWA - Service Worker & Manifest (gerados inline)
+// PWA - Service Worker, instalação e detecção
 // ============================================
-const MANIFEST = {
-  name: "Meu Treino - Carlos Papaleo",
-  short_name: "Meu Treino",
-  description: "App de acompanhamento de treino",
-  start_url: location.href.split('?')[0],
-  display: "standalone",
-  background_color: "#0a0a0f",
-  theme_color: "#0a0a0f",
-  orientation: "portrait",
-  icons: [
-    {
-      src: "data:image/svg+xml," + encodeURIComponent(`
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-          <rect width="512" height="512" rx="96" fill="#0a0a0f"/>
-          <rect x="20" y="20" width="472" height="472" rx="80" fill="url(#g)"/>
-          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00d4aa"/><stop offset="100%" stop-color="#8844ff"/></linearGradient></defs>
-          <text x="256" y="300" text-anchor="middle" font-size="260" font-family="sans-serif">🏋️</text>
-        </svg>
-      `),
-      sizes: "512x512",
-      type: "image/svg+xml",
-      purpose: "any maskable"
+let deferredPrompt = null;
+let installDismissed = localStorage.getItem('treino_install_dismissed') === '1';
+
+function isStandaloneDisplay() {
+  return window.matchMedia('(display-mode: standalone)').matches ||
+         window.matchMedia('(display-mode: fullscreen)').matches ||
+         window.navigator.standalone === true;
+}
+
+async function isAppInstalled() {
+  if (isStandaloneDisplay()) return true;
+  if ('getInstalledRelatedApps' in navigator) {
+    try {
+      const relatedApps = await navigator.getInstalledRelatedApps();
+      return relatedApps.length > 0;
+    } catch (e) {
+      console.warn('Não foi possível consultar apps instalados:', e);
     }
-  ]
-};
+  }
+  return localStorage.getItem('treino_app_installed') === '1';
+}
 
-const manifestBlob = new Blob([JSON.stringify(MANIFEST)], { type: 'application/json' });
-const manifestUrl = URL.createObjectURL(manifestBlob);
-document.getElementById('manifest-link').href = manifestUrl;
+async function updateInstallUI() {
+  const banner = document.getElementById('installBanner');
+  if (!banner) return;
 
-const SW_CODE = `
-const CACHE_NAME = 'treino-v2';
-self.addEventListener('install', e => { self.skipWaiting(); });
-self.addEventListener('activate', e => { e.waitUntil(clients.claim()); });
-self.addEventListener('fetch', e => {
-  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
-});
-`;
+  const installed = await isAppInstalled();
+  if (installed) {
+    banner.classList.remove('show');
+    localStorage.setItem('treino_app_installed', '1');
+    return;
+  }
 
-if ('serviceWorker' in navigator) {
-  const swBlob = new Blob([SW_CODE], { type: 'application/javascript' });
-  const swUrl = URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swUrl, { scope: '/' }).catch(() => {
-    console.log('SW via blob não suportado.');
+  if (deferredPrompt && !installDismissed) {
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+}
+
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(() => updateInstallUI())
+      .catch((e) => {
+        console.warn('Service worker não registrado:', e);
+      });
   });
 }
 
-let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  document.getElementById('installBanner').classList.add('show');
+  updateInstallUI();
 });
 
 function installApp() {
   if (deferredPrompt) {
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then(result => {
-      if (result.outcome === 'accepted') showToast('📲 App instalado com sucesso!');
+      if (result.outcome === 'accepted') {
+        localStorage.setItem('treino_app_installed', '1');
+        showToast('📲 App instalado com sucesso!');
+      }
       deferredPrompt = null;
-      document.getElementById('installBanner').classList.remove('show');
+      updateInstallUI();
     });
+  } else if (isStandaloneDisplay()) {
+    showToast('✅ App já está instalado.');
   } else {
-    showToast('💡 Abra o menu do navegador → "Adicionar à tela inicial"');
+    showToast('💡 Abra o menu do navegador e toque em "Adicionar à tela inicial"');
   }
 }
 
 function dismissInstall() {
+  installDismissed = true;
+  localStorage.setItem('treino_install_dismissed', '1');
   document.getElementById('installBanner').classList.remove('show');
 }
 
 window.addEventListener('appinstalled', () => {
-  document.getElementById('installBanner').classList.remove('show');
+  deferredPrompt = null;
+  localStorage.setItem('treino_app_installed', '1');
+  updateInstallUI();
   showToast('✅ App instalado na tela inicial!');
 });
+
+const standaloneQuery = window.matchMedia('(display-mode: standalone)');
+if (standaloneQuery.addEventListener) {
+  standaloneQuery.addEventListener('change', updateInstallUI);
+} else if (standaloneQuery.addListener) {
+  standaloneQuery.addListener(updateInstallUI);
+}
+updateInstallUI();
 
 // ============================================
 // SOM DE SINO (gerado via Web Audio API)
