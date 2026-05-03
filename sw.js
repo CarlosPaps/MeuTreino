@@ -1,8 +1,9 @@
-const CACHE_NAME = 'meu-treino-v3';
+const CACHE_NAME = 'meu-treino-v4';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './bell.mp3',
   './icon.svg',
   './icon-192.png',
   './icon-512.png'

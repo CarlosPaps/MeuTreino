@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.googleapis.com https://*.gstatic.com https://*.firebaseio.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://accounts.google.com; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://img.youtube.com https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://accounts.google.com;">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0a0a0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -605,17 +605,313 @@
   }
 
   @media (max-width: 600px) {
-    .container { padding: 12px; }
-    .header h1 { font-size: 22px; }
-    .info-bar { grid-template-columns: repeat(2, 1fr); }
-    .treino-selector { grid-template-columns: repeat(2, 1fr); }
-    .exercise-top { flex-direction: column; }
-    .video-thumb { width: 100%; height: 56px; }
-    .timer-section { flex-direction: column; gap: 16px; text-align: center; }
-    .complete-btn { padding: 7px 10px; font-size: 11px; }
+    :root {
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    body {
+      background:
+        linear-gradient(180deg, rgba(0, 212, 170, 0.025), transparent 180px),
+        var(--bg-primary);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .container {
+      width: 100%;
+      padding: max(8px, env(safe-area-inset-top)) 10px max(14px, env(safe-area-inset-bottom));
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      padding: 8px 2px 12px;
+    }
+
+    .header-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 15px;
+      margin: 0;
+      font-size: 24px;
+      box-shadow: 0 5px 20px rgba(0, 212, 170, 0.22);
+      animation: none;
+      flex-shrink: 0;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      line-height: 1.05;
+      margin-bottom: 3px;
+    }
+
+    .header .subtitle {
+      font-size: 12px;
+      line-height: 1.25;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .container > div[style*="justify-content:space-between"] {
+      margin-bottom: 10px !important;
+      padding: 7px 10px !important;
+      border-radius: 8px !important;
+    }
+
+    .info-bar {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .info-item {
+      min-height: 64px;
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .info-item .label {
+      font-size: 10px;
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+    }
+
+    .info-item .value {
+      font-size: 16px;
+      line-height: 1.15;
+    }
+
+    .last-session {
+      padding: 14px 14px 14px 16px;
+      margin-bottom: 18px;
+    }
+
+    .last-session h3,
+    .section-title {
+      font-size: 11px;
+      letter-spacing: 1.2px;
+    }
+
+    .last-session h3 { margin-bottom: 7px; }
+    .last-session .session-info { font-size: 18px; line-height: 1.2; }
+    .last-session .session-date { font-size: 12px; margin-top: 5px; }
+
+    .section-title { margin-bottom: 10px; }
+
+    .treino-selector {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .treino-btn {
+      min-height: 74px;
+      padding: 12px 8px;
+      border-width: 1px;
+    }
+
+    .treino-btn:hover,
+    .treino-btn.active {
+      transform: none;
+    }
+
+    .treino-btn .treino-letter {
+      font-size: 28px;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+
+    .treino-btn .treino-muscles {
+      font-size: 11px;
+      line-height: 1.2;
+    }
+
+    .data-actions {
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .data-btn {
+      flex: 1;
+      justify-content: center;
+      min-height: 42px;
+      padding: 9px 10px;
+    }
+
+    .history-section { margin-bottom: 24px; }
+    .history-header { margin-bottom: 10px; }
+    .history-list { gap: 7px; }
+
+    .history-item {
+      min-height: 52px;
+      padding: 10px 12px;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .history-item .hi-treino { font-size: 13px; }
+    .history-item .hi-badge { padding: 3px 8px; font-size: 10px; }
+
+    .footer {
+      padding: 18px 8px;
+      font-size: 11px;
+    }
+
+    #workoutScreen > div:first-child {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      margin: -8px -10px 10px !important;
+      padding: 8px 10px;
+      background: rgba(10, 10, 15, 0.94);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+    }
+
+    #backBtn {
+      width: 40px;
+      height: 40px;
+      padding: 0 !important;
+      justify-content: center;
+      font-size: 0 !important;
+      color: transparent !important;
+      position: relative;
+    }
+
+    #backBtn::before {
+      content: '←';
+      font-size: 18px;
+      color: var(--text-secondary);
+      line-height: 1;
+    }
+
+    #workoutTitle { font-size: 16px !important; line-height: 1.15; }
+    #workoutSubtitle { font-size: 11px !important; }
+
+    .timer-section {
+      gap: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: var(--radius-sm);
+    }
+
+    .timer-display { font-size: 28px; }
+    .timer-buttons { gap: 6px; }
+    .timer-btn { min-height: 38px; padding: 8px 12px; }
+
+    .progress-section { margin-bottom: 12px; }
+    .exercise-list { gap: 10px; margin-bottom: 16px; }
+
+    .exercise-main { align-items: stretch; }
+
+    .exercise-seq {
+      width: 34px;
+      font-size: 16px;
+      align-items: flex-start;
+      padding-top: 78px;
+    }
+
+    .exercise-content {
+      padding: 12px 10px 12px 0;
+      gap: 10px;
+    }
+
+    .exercise-top {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .exercise-name {
+      font-size: 15px;
+      line-height: 1.22;
+      margin-bottom: 7px;
+    }
+
+    .exercise-tags { gap: 5px; }
+
+    .tag {
+      padding: 3px 8px;
+      font-size: 10px;
+      line-height: 1.2;
+    }
+
+    .video-thumb {
+      width: 76px;
+      height: 54px;
+      border-radius: 8px;
+    }
+
+    .video-thumb .play-icon { font-size: 22px; }
+
+    .sets-container {
+      gap: 6px;
+      padding: 9px;
+    }
+
+    .sets-header { margin-bottom: 1px; }
+    .sets-title { font-size: 10px; letter-spacing: 0.8px; }
+
+    .set-row { gap: 6px; }
+
+    .set-number {
+      width: 32px;
+      height: 32px;
+      font-size: 12px;
+    }
+
+    .weight-input-group {
+      min-height: 40px;
+      padding: 5px 10px;
+      gap: 6px;
+    }
+
+    .weight-input { font-size: 15px; }
+
+    .complete-btn {
+      width: 40px;
+      min-height: 40px;
+      justify-content: center;
+      padding: 0;
+      font-size: 13px;
+    }
+
     .complete-btn .btn-text { display: none; }
     .install-banner { flex-direction: column; text-align: center; }
     .auth-bar { flex-direction: column; align-items: flex-start; }
+
+    .observation {
+      padding: 12px;
+      margin-bottom: 14px;
+      font-size: 12px;
+    }
+
+    .save-section {
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .save-btn,
+    .reset-btn {
+      min-height: 46px;
+      padding: 12px 14px;
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .container { padding-left: 8px; padding-right: 8px; }
+    .header h1 { font-size: 22px; }
+    .header .subtitle { font-size: 11px; }
+    .treino-btn { min-height: 68px; }
+    .video-thumb { width: 64px; height: 48px; }
+    .tag { padding-inline: 6px; }
   }
 
   ::-webkit-scrollbar { width: 6px; }
@@ -1019,68 +1315,17 @@ if (standaloneQuery.addEventListener) {
 updateInstallUI();
 
 // ============================================
-// SOM DE SINO (gerado via Web Audio API)
+// SOM DE SINO
 // ============================================
-let audioCtx = null;
+const bellAudio = new Audio('./bell.mp3');
+bellAudio.preload = 'auto';
 
 function playBellSound() {
   try {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const ctx = audioCtx;
-    const now = ctx.currentTime;
-
-    // Toque único, grave e elegante — tipo sino de meditação
-    // Fundamental grave (110 Hz ~ Lá2) com decaimento longo
-    const freqs   = [110, 220, 330];
-    const volumes = [0.55, 0.25, 0.10];
-    const decays  = [3.5,  2.8,  2.0];
-
-    freqs.forEach((freq, i) => {
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, now);
-      // Pequeno pitch drop inicial — dá sensação de martelo no sino
-      osc.frequency.exponentialRampToValueAtTime(freq * 0.995, now + 0.08);
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(volumes[i], now + 0.004); // ataque curtíssimo
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + decays[i]); // decaimento longo
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + decays[i] + 0.1);
-    });
-
-    // Clique de impacto (ruído breve) para dar peso ao toque
-    const bufSize = ctx.sampleRate * 0.03;
-    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let j = 0; j < bufSize; j++) data[j] = (Math.random() * 2 - 1) * (1 - j / bufSize);
-    const noise = ctx.createBufferSource();
-    noise.buffer = buf;
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.08, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
-    noise.connect(noiseGain);
-    noiseGain.connect(ctx.destination);
-    noise.start(now);
-
+    bellAudio.currentTime = 0;
+    bellAudio.play().catch((e) => console.log('Audio não suportado:', e));
   } catch (e) { console.log('Audio não suportado:', e); }
 }
-
-document.addEventListener('click', function initAudio() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    gain.gain.value = 0;
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.01);
-  }
-  document.removeEventListener('click', initAudio);
-}, { once: true });
 
 // ============================================
 // DATA
@@ -1395,7 +1640,7 @@ function toggleSet(exerciseKey, setIndex) {
     btn.classList.add('done');
     btn.innerHTML = '<span>✅</span><span class="btn-text">Feito</span>';
     const nextSet = ex.sets[setIndex + 1];
-    if (nextSet && !nextSet.weight && set.weight) {
+    if (nextSet && set.weight) {
       nextSet.weight = set.weight;
       const nextInput = document.getElementById(`weight-${exerciseKey}-${setIndex + 1}`);
       if (nextInput) nextInput.value = set.weight;
