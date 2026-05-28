@@ -540,6 +540,124 @@
 
   .timer-btn.start:hover { box-shadow: 0 4px 16px rgba(0, 212, 170, 0.3); }
 
+  .floating-timer {
+    position: fixed;
+    left: max(14px, env(safe-area-inset-left));
+    bottom: max(16px, env(safe-area-inset-bottom));
+    z-index: 1600;
+    min-width: 190px;
+    max-width: calc(100vw - 28px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border: 1px solid rgba(0, 212, 170, 0.28);
+    border-radius: var(--radius-sm);
+    background:
+      linear-gradient(135deg, rgba(26, 26, 46, 0.96), rgba(18, 18, 26, 0.94)),
+      radial-gradient(circle at 12% 18%, rgba(0, 212, 170, 0.18), transparent 32%);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), 0 0 24px rgba(0, 212, 170, 0.08);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-10px, 16px) scale(0.96);
+    transition: opacity 0.22s ease, transform 0.22s ease, border-color 0.22s ease;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .floating-timer.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(0, 0) scale(1);
+  }
+
+  .floating-timer.running {
+    border-color: rgba(0, 212, 170, 0.62);
+  }
+
+  .floating-timer.warning {
+    border-color: rgba(255, 170, 0, 0.7);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), 0 0 28px rgba(255, 170, 0, 0.12);
+  }
+
+  .floating-timer.done {
+    border-color: rgba(255, 68, 102, 0.72);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), 0 0 28px rgba(255, 68, 102, 0.14);
+  }
+
+  .floating-timer-pulse {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 0 0 6px rgba(0, 212, 170, 0.12);
+    flex: 0 0 auto;
+  }
+
+  .floating-timer.warning .floating-timer-pulse {
+    background: var(--warning);
+    box-shadow: 0 0 0 6px rgba(255, 170, 0, 0.12);
+  }
+
+  .floating-timer.done .floating-timer-pulse {
+    background: var(--danger);
+    box-shadow: 0 0 0 6px rgba(255, 68, 102, 0.12);
+  }
+
+  .floating-timer-main {
+    min-width: 72px;
+    flex: 1;
+  }
+
+  .floating-timer-label {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+
+  .floating-timer-time {
+    margin-top: 4px;
+    color: var(--accent);
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .floating-timer.warning .floating-timer-time { color: var(--warning); }
+  .floating-timer.done .floating-timer-time { color: var(--danger); }
+
+  .floating-timer-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .floating-timer-btn {
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-xs);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 900;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+  }
+
+  .floating-timer-btn:hover {
+    border-color: var(--accent);
+    background: rgba(0, 212, 170, 0.12);
+    color: var(--accent);
+  }
+
   .footer {
     text-align: center; padding: 30px;
     color: var(--text-muted); font-size: 12px;
@@ -1508,6 +1626,18 @@
 
 <div class="toast" id="toast"><span>✅</span><span id="toastText">Salvo!</span></div>
 
+<div class="floating-timer" id="floatingTimer" aria-live="polite" aria-label="Cronômetro de descanso">
+  <div class="floating-timer-pulse" aria-hidden="true"></div>
+  <div class="floating-timer-main">
+    <div class="floating-timer-label" id="floatingTimerLabel">Descanso</div>
+    <div class="floating-timer-time" id="floatingTimerDisplay">00:30</div>
+  </div>
+  <div class="floating-timer-actions">
+    <button class="floating-timer-btn" id="floatingTimerToggle" type="button" onclick="toggleFloatingTimer()" title="Iniciar ou pausar cronômetro">▶</button>
+    <button class="floating-timer-btn" type="button" onclick="resetTimer()" title="Resetar cronômetro">↺</button>
+  </div>
+</div>
+
 <script>
 // ============================================
 // ██████╗  FIREBASE CONFIG
@@ -1788,9 +1918,28 @@ updateInstallUI();
 // ============================================
 const bellAudio = new Audio('./bell.mp3');
 bellAudio.preload = 'auto';
+let bellAudioUnlocked = false;
+
+async function unlockBellSound() {
+  if (bellAudioUnlocked) return;
+  const previousVolume = bellAudio.volume;
+  try {
+    bellAudio.volume = 0;
+    bellAudio.currentTime = 0;
+    await bellAudio.play();
+    bellAudio.pause();
+    bellAudio.currentTime = 0;
+    bellAudioUnlocked = true;
+  } catch (e) {
+    console.log('Audio ainda bloqueado:', e);
+  } finally {
+    bellAudio.volume = previousVolume;
+  }
+}
 
 function playBellSound() {
   try {
+    bellAudio.pause();
     bellAudio.currentTime = 0;
     bellAudio.play().catch((e) => console.log('Audio não suportado:', e));
   } catch (e) { console.log('Audio não suportado:', e); }
@@ -1860,8 +2009,153 @@ const TREINOS = {
 // ============================================
 let currentTreino = null;
 let sessionData = {};
+const REST_SECONDS = 30;
+const TIMER_TICK_MS = 250;
+const TIMER_RESET_DELAY_MS = 3000;
+const TIMER_NOTIFICATION_TAG = 'meu-treino-descanso';
 let timerInterval = null;
-let timerSeconds = 30;
+let timerResetTimeout = null;
+let timerSeconds = REST_SECONDS;
+let timerEndsAt = null;
+let timerAlarmFired = false;
+let timerNotificationScheduled = false;
+let wakeLock = null;
+let timerSectionVisible = true;
+let floatingTimerObserver = null;
+
+// ============================================
+// TIMER EM BACKGROUND / ANDROID
+// ============================================
+function canUseTimerNotifications() {
+  return 'Notification' in window && 'serviceWorker' in navigator && location.protocol !== 'file:';
+}
+
+function supportsScheduledTimerNotifications() {
+  return canUseTimerNotifications() &&
+    'showTrigger' in Notification.prototype &&
+    'TimestampTrigger' in window;
+}
+
+async function ensureTimerNotificationPermission() {
+  if (!canUseTimerNotifications()) return false;
+  if (Notification.permission === 'granted') return true;
+  if (Notification.permission === 'denied') {
+    showToast('Ative notificações do app para tocar com a tela bloqueada.');
+    return false;
+  }
+
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      showToast('Ative notificações para o alarme tocar bloqueado.');
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.log('Permissão de notificação não disponível:', e);
+    return false;
+  }
+}
+
+function buildTimerNotificationOptions(timestamp = Date.now(), extra = {}) {
+  return {
+    body: 'Descanso acabou. Bora próxima série!',
+    icon: './icon-192.png',
+    badge: './icon-192.png',
+    tag: TIMER_NOTIFICATION_TAG,
+    renotify: true,
+    requireInteraction: true,
+    vibrate: [200, 100, 200, 100, 200],
+    timestamp,
+    data: { type: 'rest-timer', url: './index.html' },
+    ...extra
+  };
+}
+
+async function getTimerNotifications(registration) {
+  try {
+    return await registration.getNotifications({
+      tag: TIMER_NOTIFICATION_TAG,
+      includeTriggered: true
+    });
+  } catch (e) {
+    return registration.getNotifications({ tag: TIMER_NOTIFICATION_TAG });
+  }
+}
+
+async function cancelTimerNotification() {
+  timerNotificationScheduled = false;
+  if (!canUseTimerNotifications() || Notification.permission !== 'granted') return;
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const notifications = await getTimerNotifications(registration);
+    notifications.forEach(notification => notification.close());
+  } catch (e) {
+    console.log('Não foi possível cancelar notificação:', e);
+  }
+}
+
+async function scheduleTimerNotification(endsAt) {
+  if (!supportsScheduledTimerNotifications() || Notification.permission !== 'granted' || !endsAt) {
+    return false;
+  }
+
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const notifications = await getTimerNotifications(registration);
+    notifications.forEach(notification => notification.close());
+
+    await registration.showNotification(
+      'Descanso acabou!',
+      buildTimerNotificationOptions(endsAt, { showTrigger: new TimestampTrigger(endsAt) })
+    );
+    timerNotificationScheduled = true;
+    return true;
+  } catch (e) {
+    timerNotificationScheduled = false;
+    console.log('Agendamento de notificação não disponível:', e);
+    return false;
+  }
+}
+
+async function showTimerNotification() {
+  if (!canUseTimerNotifications() || Notification.permission !== 'granted') return;
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    await registration.showNotification('Descanso acabou!', buildTimerNotificationOptions());
+  } catch (e) {
+    console.log('Notificação não suportada:', e);
+  }
+}
+
+async function requestTimerWakeLock() {
+  if (!('wakeLock' in navigator) || wakeLock || document.visibilityState !== 'visible') return;
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release', () => { wakeLock = null; }, { once: true });
+  } catch (e) {
+    console.log('Wake Lock não disponível:', e);
+  }
+}
+
+async function releaseTimerWakeLock() {
+  if (!wakeLock) return;
+  const currentWakeLock = wakeLock;
+  wakeLock = null;
+  try {
+    await currentWakeLock.release();
+  } catch (e) {}
+}
+
+function prepareTimerAlarms() {
+  unlockBellSound();
+  requestTimerWakeLock();
+  ensureTimerNotificationPermission().then((granted) => {
+    if (granted && timerInterval && timerEndsAt && document.visibilityState !== 'visible') {
+      scheduleTimerNotification(timerEndsAt);
+    }
+  });
+}
 
 // ============================================
 // SESSÃO EM ANDAMENTO (auto-save / auto-restore)
@@ -2077,6 +2371,7 @@ function selectTreino(letra, savedSession) {
   document.getElementById('workoutTitle').textContent = `Treino ${letra} — ${treino.descricao}`;
   document.getElementById('workoutSubtitle').textContent = `${treino.exercicios.length} exercícios · ${treino.exercicios[0].series} séries cada`;
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  setupFloatingTimerVisibility();
 
   // Restaura sessão salva (se veio do auto-restore) ou salva nova sessão iniciada
   if (savedSession) {
@@ -2099,6 +2394,7 @@ function voltarInicio() {
   sessionData = {};
   document.getElementById('workoutScreen').style.display = 'none';
   document.getElementById('homeScreen').style.display = 'block';
+  updateFloatingTimer();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -2161,51 +2457,183 @@ function updateProgress() {
 // ============================================
 function startTimer() {
   if (timerInterval) return;
-  const btn = document.getElementById('timerStartBtn');
-  btn.textContent = 'Pausar';
-  btn.onclick = pauseTimer;
+  if (timerSeconds <= 0) timerSeconds = REST_SECONDS;
+  clearTimeout(timerResetTimeout);
+  timerResetTimeout = null;
+  timerAlarmFired = false;
+  timerEndsAt = Date.now() + (timerSeconds * 1000);
+  setTimerButton('Pausar', pauseTimer);
+  prepareTimerAlarms();
+  updateTimerDisplay();
 
-  timerInterval = setInterval(() => {
-    timerSeconds--;
-    if (timerSeconds <= 0) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-      timerSeconds = 0;
-      btn.textContent = 'Iniciar';
-      btn.onclick = startTimer;
-      playBellSound();
-      if ('vibrate' in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
-      showToast('🔔 Descanso acabou! Bora próxima série!');
-      setTimeout(() => { if (!timerInterval) { timerSeconds = 30; updateTimerDisplay(); } }, 3000);
-    }
-    updateTimerDisplay();
-  }, 1000);
+  timerInterval = setInterval(syncTimerFromClock, TIMER_TICK_MS);
+  syncTimerFromClock();
 }
 
 function pauseTimer() {
+  syncTimerFromClock();
   clearInterval(timerInterval);
   timerInterval = null;
-  const btn = document.getElementById('timerStartBtn');
-  btn.textContent = 'Continuar';
-  btn.onclick = startTimer;
+  timerEndsAt = null;
+  timerAlarmFired = false;
+  setTimerButton('Continuar', startTimer);
+  releaseTimerWakeLock();
+  cancelTimerNotification();
+  updateTimerDisplay();
 }
 
 function resetTimer() {
   clearInterval(timerInterval);
   timerInterval = null;
-  timerSeconds = 30;
+  clearTimeout(timerResetTimeout);
+  timerResetTimeout = null;
+  timerSeconds = REST_SECONDS;
+  timerEndsAt = null;
+  timerAlarmFired = false;
   updateTimerDisplay();
+  setTimerButton('Iniciar', startTimer);
+  releaseTimerWakeLock();
+  cancelTimerNotification();
+}
+
+function setTimerButton(text, handler) {
   const btn = document.getElementById('timerStartBtn');
-  btn.textContent = 'Iniciar';
-  btn.onclick = startTimer;
+  if (!btn) return;
+  btn.textContent = text;
+  btn.onclick = handler;
+  updateFloatingTimer();
+}
+
+function syncTimerFromClock() {
+  if (!timerEndsAt || timerAlarmFired) return;
+  const remainingMs = timerEndsAt - Date.now();
+  timerSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+  updateTimerDisplay();
+  if (remainingMs <= 0) finishTimer();
+}
+
+function finishTimer() {
+  if (timerAlarmFired) return;
+  const hadScheduledNotification = timerNotificationScheduled;
+  timerAlarmFired = true;
+  timerNotificationScheduled = false;
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerEndsAt = null;
+  timerSeconds = 0;
+  setTimerButton('Iniciar', startTimer);
+  releaseTimerWakeLock();
+  playBellSound();
+  if ('vibrate' in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
+  if (document.visibilityState !== 'visible' && !hadScheduledNotification) showTimerNotification();
+  showToast('🔔 Descanso acabou! Bora próxima série!');
+  updateTimerDisplay();
+  timerResetTimeout = setTimeout(() => {
+    if (!timerInterval) {
+      timerSeconds = REST_SECONDS;
+      timerAlarmFired = false;
+      updateTimerDisplay();
+    }
+  }, TIMER_RESET_DELAY_MS);
 }
 
 function updateTimerDisplay() {
   const min = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
   const sec = (timerSeconds % 60).toString().padStart(2, '0');
-  document.getElementById('timerDisplay').textContent = `${min}:${sec}`;
-  document.getElementById('timerDisplay').style.color = (timerSeconds <= 5 && timerSeconds > 0) ? 'var(--danger)' : 'var(--accent)';
+  const value = `${min}:${sec}`;
+  const timerDisplay = document.getElementById('timerDisplay');
+  if (timerDisplay) {
+    timerDisplay.textContent = value;
+    timerDisplay.style.color = (timerSeconds <= 5 && timerSeconds > 0) ? 'var(--danger)' : 'var(--accent)';
+  }
+  updateFloatingTimer(value);
 }
+
+function isWorkoutScreenVisible() {
+  const workoutScreen = document.getElementById('workoutScreen');
+  return !!workoutScreen && workoutScreen.style.display !== 'none';
+}
+
+function measureTimerSectionVisibility() {
+  const timerSection = document.getElementById('timerSection');
+  if (!timerSection || !isWorkoutScreenVisible()) {
+    timerSectionVisible = true;
+    updateFloatingTimer();
+    return;
+  }
+
+  const rect = timerSection.getBoundingClientRect();
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  timerSectionVisible = rect.bottom > 12 && rect.top < viewportHeight - 12;
+  updateFloatingTimer();
+}
+
+function setupFloatingTimerVisibility() {
+  const timerSection = document.getElementById('timerSection');
+  if (!timerSection) return;
+
+  if (!floatingTimerObserver && 'IntersectionObserver' in window) {
+    floatingTimerObserver = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      timerSectionVisible = entry.isIntersecting && entry.intersectionRatio > 0.12;
+      updateFloatingTimer();
+    }, { threshold: [0, 0.12] });
+    floatingTimerObserver.observe(timerSection);
+  }
+
+  measureTimerSectionVisibility();
+}
+
+function updateFloatingTimer(value) {
+  const floatingTimer = document.getElementById('floatingTimer');
+  if (!floatingTimer) return;
+
+  const display = document.getElementById('floatingTimerDisplay');
+  const label = document.getElementById('floatingTimerLabel');
+  const toggle = document.getElementById('floatingTimerToggle');
+  const timeValue = value || document.getElementById('timerDisplay')?.textContent || '00:30';
+  const isRunning = !!timerInterval;
+  const isDone = timerSeconds <= 0;
+  const isWarning = timerSeconds <= 5 && timerSeconds > 0;
+  const shouldShow = !!currentTreino && isWorkoutScreenVisible() && !timerSectionVisible;
+
+  floatingTimer.classList.toggle('show', shouldShow);
+  floatingTimer.classList.toggle('running', isRunning);
+  floatingTimer.classList.toggle('warning', isWarning);
+  floatingTimer.classList.toggle('done', isDone);
+  floatingTimer.setAttribute('aria-label', `Cronômetro de descanso: ${timeValue}`);
+
+  if (display) display.textContent = timeValue;
+  if (label) label.textContent = isDone ? 'Acabou' : (isRunning ? 'Descanso' : 'Pausado');
+  if (toggle) {
+    toggle.textContent = isRunning ? '⏸' : '▶';
+    toggle.title = isRunning ? 'Pausar cronômetro' : 'Iniciar cronômetro';
+  }
+}
+
+function toggleFloatingTimer() {
+  if (timerInterval) {
+    pauseTimer();
+  } else {
+    startTimer();
+  }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (!timerInterval || !timerEndsAt || timerAlarmFired) return;
+
+  if (document.visibilityState === 'visible') {
+    cancelTimerNotification();
+    syncTimerFromClock();
+    requestTimerWakeLock();
+  } else {
+    releaseTimerWakeLock();
+    scheduleTimerNotification(timerEndsAt);
+  }
+});
+
+window.addEventListener('scroll', measureTimerSectionVisibility, { passive: true });
+window.addEventListener('resize', measureTimerSectionVisibility);
 
 // ============================================
 // SAVE / RESET / HISTORY
@@ -2237,6 +2665,7 @@ function saveSession() {
     sessionData = {};
     document.getElementById('workoutScreen').style.display = 'none';
     document.getElementById('homeScreen').style.display = 'block';
+    updateFloatingTimer();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, 1500);
 }
@@ -2262,6 +2691,7 @@ function resetSession() {
     sessionData = {};
     document.getElementById('workoutScreen').style.display = 'none';
     document.getElementById('homeScreen').style.display = 'block';
+    updateFloatingTimer();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, 1000);
 }
@@ -2276,7 +2706,7 @@ function renderHistory() {
   const data = loadAllData();
   const list = document.getElementById('historyList');
   if (!data.history?.length) { list.innerHTML = '<div class="no-history">Nenhuma sessão salva ainda.</div>'; return; }
-  list.innerHTML = data.history.slice(0, 15).map(item => {
+  list.innerHTML = data.history.slice(0, 4).map(item => {
     const color = { A: 'var(--peito)', B: 'var(--costas)', C: 'var(--ombro)', D: 'var(--perna)' }[item.treino] || 'var(--accent)';
     const pct   = item.total > 0 ? Math.round((item.completed / item.total) * 100) : 0;
     const sTreino = sanitize(item.treino);

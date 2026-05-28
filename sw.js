@@ -1,4 +1,4 @@
-const CACHE_NAME = 'meu-treino-v4';
+const CACHE_NAME = 'meu-treino-v7';
 const APP_SHELL = [
   './',
   './index.html',
@@ -43,4 +43,26 @@ self.addEventListener('fetch', (event) => {
         return undefined;
       }))
   );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = new URL(event.notification.data?.url || './index.html', self.location.href).href;
+
+  event.waitUntil((async () => {
+    const windowClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of windowClients) {
+      if ('focus' in client) {
+        if ('navigate' in client && client.url !== targetUrl) {
+          await client.navigate(targetUrl);
+        }
+        await client.focus();
+        return;
+      }
+    }
+
+    if (clients.openWindow) {
+      await clients.openWindow(targetUrl);
+    }
+  })());
 });
